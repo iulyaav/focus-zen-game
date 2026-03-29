@@ -8,6 +8,8 @@ let days = 1;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+drawGrid(10, 10);
+
 // Listen for the space bar
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
@@ -20,5 +22,26 @@ window.addEventListener('keydown', (e) => {
 function updateGarden() {
     // This is where we will draw the garden later!
     console.log("Day passed:", days);
+}
+
+function drawGrid(stepX, stepY) {
+    ctx.strokeStyle = '#e0e0e0'; // Light grey lines
+    ctx.lineWidth = 0.5;
+
+    // Draw vertical lines
+    for (let x = 0; x <= canvas.width; x += stepX) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    // Draw horizontal lines
+    for (let y = 0; y <= canvas.height; y += stepY) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
 }
 
