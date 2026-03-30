@@ -1,8 +1,14 @@
 const canvas = document.getElementById('gardenCanvas');
 const ctx = canvas.getContext('2d');
 const dayDisplay = document.getElementById('day-counter');
+const seasonDisplay = document.getElementById('season-name');
+const yearDisplay = document.getElementById('year-counter');
 
 let days = 1;
+let year = 1;
+let clicks = 0;
+const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
+let seasonIndex = 0;
 
 const GRID_WIDTH = 160;
 const GRID_HEIGHT = 90;
@@ -10,9 +16,11 @@ let cellSize = 10; // Each "pixel" is 10x10 real pixels
 let skyPlane = null;
 let groundPlane = null;
 const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
+const showGridLines = false;
 
 resizeCanvas();
 renderScene();
+updateHud();
 
 // An array to store which cells should be red
 let redCells = [];
@@ -24,8 +32,13 @@ window.addEventListener('keydown', (e) => {
             startWelcomeScreenFade();
             return;
         }
+        clicks++;
         days++;
-        dayDisplay.innerText = days;
+        updateHud();
+
+        if (clicks % 30 === 0) {
+            advanceSeason();
+        }
 
         redCells.push(createColorPixel(GRID_WIDTH, GRID_HEIGHT));
 
@@ -58,7 +71,9 @@ function renderScene() {
         return;
     }
     drawBackground();
-    drawGrid(cellSize, cellSize);
+    if (showGridLines) {
+        drawGrid(cellSize, cellSize);
+    }
     updateGarden();
     welcomeScreen.draw(ctx, canvas.width, canvas.height);
 }
@@ -81,6 +96,20 @@ function updatePlanes() {
         height: canvas.height - skyHeight,
         color: '#ada171',
     };
+}
+
+function updateHud() {
+    dayDisplay.innerText = days;
+    seasonDisplay.innerText = seasons[seasonIndex];
+    yearDisplay.innerText = year;
+}
+
+function advanceSeason() {
+    seasonIndex = (seasonIndex + 1) % seasons.length;
+    if (seasonIndex === 0) {
+        year++;
+    }
+    updateHud();
 }
 
 function startWelcomeScreenFade() {
