@@ -8,13 +8,24 @@ let days = 1;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-drawGrid(10, 10);
+
+const CELL_SIZE = 10; // Each "pixel" is 10x10 real pixels
+const GRID_WIDTH = 160;
+const GRID_HEIGHT = 90;
+
+drawGrid(CELL_SIZE, CELL_SIZE);
+
+// An array to store which cells should be red
+let redCells = [];
 
 // Listen for the space bar
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
         days++;
         dayDisplay.innerText = days;
+
+        redCells.push(createColorPixel(GRID_WIDTH, GRID_HEIGHT));
+
         updateGarden();
     }
 });
@@ -22,6 +33,10 @@ window.addEventListener('keydown', (e) => {
 function updateGarden() {
     // This is where we will draw the garden later!
     console.log("Day passed:", days);
+    redCells.forEach(cell => {
+        drawCell(cell.x, cell.y, 'red');
+    });
+    
 }
 
 function drawGrid(stepX, stepY) {
@@ -45,3 +60,8 @@ function drawGrid(stepX, stepY) {
     }
 }
 
+function drawCell(gridX, gridY, color) {
+    ctx.fillStyle = color;
+    // We multiply the grid coordinate by the cell size to find the screen position
+    ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+}
