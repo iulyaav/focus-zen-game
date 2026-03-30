@@ -19,8 +19,6 @@ const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 const showGridLines = false;
 const grassColor = '#609436';
 let grassBlades = [];
-const burrowColor = '#d69e60';
-let burrows = [];
 const fenceHeight = 6;
 const fenceTopOffset = 0;
 const fenceColors = {
@@ -28,6 +26,14 @@ const fenceColors = {
     main: '#d07a3a',
     highlight: '#f3a35b',
 };
+const burrowSystem = createBurrowSystem({
+    gridWidth: GRID_WIDTH,
+    gridHeight: GRID_HEIGHT,
+    fenceHeight,
+    getFenceTopRow,
+    drawPixelRect,
+});
+const flowerSystem = createFlowerSystem();
 
 resizeCanvas();
 renderScene();
@@ -50,6 +56,7 @@ window.addEventListener('keydown', (e) => {
             advanceSeason();
         }
 
+        flowerSystem.updateAll();
         updateGarden();
     }
 });
@@ -72,8 +79,9 @@ function resizeCanvas() {
     if (grassBlades.length === 0) {
         generateGrass();
     }
-    if (burrows.length === 0) {
-        generateBurrows();
+    if (!burrowSystem.hasBurrows()) {
+        burrowSystem.generateInitial(6);
+        flowerSystem.initForBurrows(burrowSystem.getBurrows().length);
     }
     renderScene();
 }
@@ -122,7 +130,10 @@ function advanceSeason() {
     if (seasonIndex === 0) {
         year++;
     }
-    addSeasonalBurrows();
+    const newIndices = burrowSystem.addSeasonal();
+    newIndices.forEach(index => {
+        flowerSystem.addForBurrow(index);
+    });
     updateHud();
 }
 
@@ -156,7 +167,7 @@ function drawWorld() {
 }
 
 function drawGarden() {
-    drawBurrows();
+    burrowSystem.draw();
 }
 
 function drawWelcomeOverlay() {
@@ -199,94 +210,6 @@ function drawPixelRect(gridX, gridY, gridWidth, gridHeight, color) {
         gridWidth * cellSize,
         gridHeight * cellSize
     );
-}
-
-function generateBurrows() {
-    const burrowCount = 6;
-    burrows = [];
-    for (let i = 0; i < burrowCount; i++) {
-        burrows.push(createGroundBurrow());
-    }
-}
-
-function createGroundBurrow() {
-    const fenceTopRow = getFenceTopRow();
-    const groundStartRow = Math.min(GRID_HEIGHT, fenceTopRow + fenceHeight);
-    const availableRows = Math.max(0, GRID_HEIGHT - groundStartRow);
-    const shapeHeight = 3;
-    const shapeHalfWidth = 2;
-
-    const x = shapeHalfWidth + Math.floor(Math.random() * (GRID_WIDTH - shapeHalfWidth * 2));
-    const y = groundStartRow + shapeHeight + Math.floor(Math.random() * (availableRows - shapeHeight - 1));
-    return { x, y };
-}
-
-function addSeasonalBurrows() {
-    const additional = 2 + Math.floor(Math.random() * 2);
-    let placed = 0;
-    let attempts = 0;
-    const maxAttempts = additional * 20;
-
-    while (placed < additional && attempts < maxAttempts) {
-        const candidate = createGroundBurrow();
-        if (isBurrowPlacementValid(candidate)) {
-            burrows.push(candidate);
-            placed++;
-        }
-        attempts++;
-    }
-}
-
-function isBurrowPlacementValid(candidate) {
-    const occupied = new Set();
-    burrows.forEach(burrow => {
-        getBurrowCells(burrow.x, burrow.y).forEach(cell => {
-            occupied.add(`${cell.x},${cell.y}`);
-        });
-    });
-
-    return getBurrowCells(candidate.x, candidate.y).every(cell => {
-        return !occupied.has(`${cell.x},${cell.y}`);
-    });
-}
-
-function getBurrowCells(centerX, centerY) {
-    return [
-        { x: centerX - 1, y: centerY - 1 },
-        { x: centerX, y: centerY - 1 },
-        { x: centerX + 1, y: centerY - 1 },
-        { x: centerX - 2, y: centerY },
-        { x: centerX - 1, y: centerY },
-        { x: centerX, y: centerY },
-        { x: centerX + 1, y: centerY },
-        { x: centerX + 2, y: centerY },
-        { x: centerX - 1, y: centerY + 1 },
-        { x: centerX, y: centerY + 1 },
-        { x: centerX + 1, y: centerY + 1 },
-    ];
-}
-
-function drawBurrows() {
-    burrows.forEach(burrow => drawBurrow(burrow.x, burrow.y));
-}
-
-function drawBurrow(centerX, centerY) {
-    const rows = [
-        { y: centerY - 1, halfWidth: 1 },
-        { y: centerY, halfWidth: 2 },
-        { y: centerY + 1, halfWidth: 1 },
-    ];
-
-    rows.forEach(row => {
-        drawPixelRect(
-            centerX - row.halfWidth,
-            row.y,
-            row.halfWidth * 2 + 1,
-            1,
-            burrowColor
-        );
-    });
-    drawPixelRect(centerX, centerY, 1, 1, burrowColor);
 }
 
 function generateGrass() {
