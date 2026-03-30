@@ -4,16 +4,15 @@ const dayDisplay = document.getElementById('day-counter');
 
 let days = 1;
 
-// Resize canvas to full screen
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-
-const CELL_SIZE = 10; // Each "pixel" is 10x10 real pixels
 const GRID_WIDTH = 160;
 const GRID_HEIGHT = 90;
+let cellSize = 10; // Each "pixel" is 10x10 real pixels
+let skyPlane = null;
+let groundPlane = null;
+const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 
-drawGrid(CELL_SIZE, CELL_SIZE);
+resizeCanvas();
+renderScene();
 
 // An array to store which cells should be red
 let redCells = [];
@@ -21,6 +20,10 @@ let redCells = [];
 // Listen for the space bar
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
+        if (welcomeScreen.active) {
+            startWelcomeScreenFade();
+            return;
+        }
         days++;
         dayDisplay.innerText = days;
 
@@ -30,11 +33,75 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+window.addEventListener('resize', () => {
+    resizeCanvas();
+});
+
+function resizeCanvas() {
+    // Resize canvas to full screen
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    cellSize = Math.min(
+        canvas.width / GRID_WIDTH,
+        canvas.height / GRID_HEIGHT
+    );
+
+    updatePlanes();
+    renderScene();
+}
+
+function renderScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (welcomeScreen.active && !welcomeScreen.fading) {
+        welcomeScreen.draw(ctx, canvas.width, canvas.height);
+        return;
+    }
+    drawBackground();
+    drawGrid(cellSize, cellSize);
+    updateGarden();
+    welcomeScreen.draw(ctx, canvas.width, canvas.height);
+}
+
+function updatePlanes() {
+    const skyHeight = canvas.height / 3;
+
+    skyPlane = {
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: skyHeight,
+        color: '#a5aeb4',
+    };
+
+    groundPlane = {
+        x: 0,
+        y: skyHeight,
+        width: canvas.width,
+        height: canvas.height - skyHeight,
+        color: '#ada171',
+    };
+}
+
+function startWelcomeScreenFade() {
+    welcomeScreen.startFade();
+    function tick(timestamp) {
+        welcomeScreen.update(timestamp);
+        renderScene();
+
+        if (welcomeScreen.active) {
+            requestAnimationFrame(tick);
+        }
+    }
+
+    requestAnimationFrame(tick);
+}
+
 function updateGarden() {
     // This is where we will draw the garden later!
     console.log("Day passed:", days);
     redCells.forEach(cell => {
-        drawCell(cell.x, cell.y, 'red');
+        drawCell(cell.x, cell.y, cell.color);
     });
     
 }
@@ -60,8 +127,18 @@ function drawGrid(stepX, stepY) {
     }
 }
 
+function drawBackground() {
+    // Sky
+    ctx.fillStyle = skyPlane.color;
+    ctx.fillRect(skyPlane.x, skyPlane.y, skyPlane.width, skyPlane.height);
+
+    // Ground
+    ctx.fillStyle = groundPlane.color;
+    ctx.fillRect(groundPlane.x, groundPlane.y, groundPlane.width, groundPlane.height);
+}
+
 function drawCell(gridX, gridY, color) {
     ctx.fillStyle = color;
     // We multiply the grid coordinate by the cell size to find the screen position
-    ctx.fillRect(gridX * CELL_SIZE, gridY * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    ctx.fillRect(gridX * cellSize, gridY * cellSize, cellSize, cellSize);
 }
