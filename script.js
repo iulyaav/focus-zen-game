@@ -19,19 +19,18 @@ const seasonSkies = {
 const GRID_WIDTH = 160;
 const GRID_HEIGHT = 90;
 let cellSize = 10; // Each "pixel" is 10x10 real pixels
+let gridOffsetX = 0;
+let gridOffsetY = 0;
+let gridPixelWidth = 0;
+let gridPixelHeight = 0;
 let skyPlane = null;
 let groundPlane = null;
 const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 const showGridLines = false;
 const grassColor = '#609436';
 let grassBlades = [];
-const fenceHeight = 6;
-const fenceTopOffset = 0;
-const fenceColors = {
-    outline: '#1f1f1f',
-    main: '#d07a3a',
-    highlight: '#f3a35b',
-};
+const fenceHeight = 7;
+const fenceTopOffset = -2;
 const burrowSystem = createBurrowSystem({
     gridWidth: GRID_WIDTH,
     gridHeight: GRID_HEIGHT,
@@ -86,6 +85,10 @@ function resizeCanvas() {
         canvas.width / GRID_WIDTH,
         canvas.height / GRID_HEIGHT
     );
+    gridPixelWidth = GRID_WIDTH * cellSize;
+    gridPixelHeight = GRID_HEIGHT * cellSize;
+    gridOffsetX = (canvas.width - gridPixelWidth) / 2;
+    gridOffsetY = (canvas.height - gridPixelHeight) / 2;
 
     updatePlanes();
     if (grassBlades.length === 0) {
@@ -104,18 +107,19 @@ function renderScene() {
         drawWelcomeOverlay();
         return;
     }
+    drawBackgroundCanvas();
     drawWorld();
     drawWelcomeOverlay();
 }
 
 function updatePlanes() {
-    const skyHeight = canvas.height / 3;
-    const skyGridHeight = Math.floor(GRID_HEIGHT * (skyHeight / canvas.height));
+    const skyHeight = gridPixelHeight / 3;
+    const skyGridHeight = Math.floor(GRID_HEIGHT * (skyHeight / gridPixelHeight));
 
     skyPlane = {
         x: 0,
         y: 0,
-        width: canvas.width,
+        width: gridPixelWidth,
         height: skyHeight,
         color: '#a5aeb4',
         gridHeight: skyGridHeight,
@@ -124,8 +128,8 @@ function updatePlanes() {
     groundPlane = {
         x: 0,
         y: skyHeight,
-        width: canvas.width,
-        height: canvas.height - skyHeight,
+        width: gridPixelWidth,
+        height: gridPixelHeight - skyHeight,
         color: '#c0d46f',
         gridHeight: GRID_HEIGHT - skyGridHeight,
     };
@@ -180,13 +184,18 @@ function updateGarden() {
 }
 
 function drawWorld() {
-    drawBackground();
+    ctx.save();
+    ctx.translate(gridOffsetX, gridOffsetY);
+    ctx.beginPath();
+    ctx.rect(0, 0, gridPixelWidth, gridPixelHeight);
+    ctx.clip();
     drawFence();
     drawGrass();
     if (showGridLines) {
         drawGrid(cellSize, cellSize);
     }
     drawGarden();
+    ctx.restore();
 }
 
 function drawGarden() {
@@ -203,25 +212,12 @@ function getFenceTopRow() {
 
 function drawFence() {
     const fenceTopRow = getFenceTopRow();
-    const postHeight = fenceHeight;
-    const postWidth = 3;
-    const postSpacing = 8;
-    const railHeight = 2;
-    const railOffsets = [2, 4];
+    const fenceAsset = ASSETS.fence;
+    const patternWidth = fenceAsset.grid[0].length;
+    const patternHeight = fenceAsset.grid.length;
 
-    // Rails with outline and highlight
-    railOffsets.forEach(offset => {
-        const railY = fenceTopRow + offset;
-        drawPixelRect(0, railY, GRID_WIDTH, railHeight, fenceColors.outline);
-        drawPixelRect(1, railY + 1, GRID_WIDTH - 2, railHeight - 1, fenceColors.main);
-        drawPixelRect(1, railY + 1, 1, railHeight - 1, fenceColors.highlight);
-    });
-
-    // Posts
-    for (let x = 1; x < GRID_WIDTH - postWidth; x += postSpacing) {
-        drawPixelRect(x, fenceTopRow, postWidth, postHeight, fenceColors.outline);
-        drawPixelRect(x + 1, fenceTopRow + 1, postWidth - 2, postHeight - 2, fenceColors.main);
-        drawPixelRect(x + 1, fenceTopRow + 1, 1, postHeight - 2, fenceColors.highlight);
+    for (let x = 0; x < GRID_WIDTH; x += patternWidth) {
+        drawAsset(ctx, fenceAsset, x, fenceTopRow, cellSize);
     }
 }
 
@@ -236,7 +232,7 @@ function drawPixelRect(gridX, gridY, gridWidth, gridHeight, color) {
 }
 
 function generateGrass() {
-    const groundRowStart = skyPlane.gridHeight;
+    const groundRowStart = Math.max(skyPlane.gridHeight, getFenceTopRow() + fenceHeight);
     const groundRowCount = groundPlane.gridHeight;
     const totalGroundCells = GRID_WIDTH * groundRowCount;
     const bladeCount = Math.max(1, Math.floor(totalGroundCells * 0.06));
@@ -269,31 +265,37 @@ function drawGrid(stepX, stepY) {
     ctx.lineWidth = 0.5;
 
     // Draw vertical lines
-    for (let x = 0; x <= canvas.width; x += stepX) {
+    for (let x = 0; x <= gridPixelWidth; x += stepX) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
+        ctx.lineTo(x, gridPixelHeight);
         ctx.stroke();
     }
 
     // Draw horizontal lines
-    for (let y = 0; y <= canvas.height; y += stepY) {
+    for (let y = 0; y <= gridPixelHeight; y += stepY) {
         ctx.beginPath();
         ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+        ctx.lineTo(gridPixelWidth, y);
         ctx.stroke();
     }
 }
 
-function drawBackground() {
-    // Sky
+function drawBackgroundCanvas() {
     const seasonName = seasons[seasonIndex];
     const drawSky = seasonSkies[seasonName] || drawSpringSky;
-    drawSky(ctx, skyPlane, cellSize);
+    const horizonY = gridOffsetY + skyPlane.height;
+    const skyPlaneCanvas = {
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: horizonY,
+    };
 
-    // Ground
+    drawSky(ctx, skyPlaneCanvas, cellSize);
+
     ctx.fillStyle = groundPlane.color;
-    ctx.fillRect(groundPlane.x, groundPlane.y, groundPlane.width, groundPlane.height);
+    ctx.fillRect(0, horizonY, canvas.width, canvas.height - horizonY);
 }
 
 function drawCell(gridX, gridY, color) {

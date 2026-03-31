@@ -4,6 +4,8 @@ const gridPlaceholder = document.querySelector('.grid-placeholder');
 const gridPanel = document.querySelector('.grid-panel');
 const colorInput = form.querySelector('input[name="current-color"]');
 const eraserButton = form.querySelector('.eraser-button');
+const nightVisionButton = form.querySelector('.night-vision-button');
+const colorPopover = document.getElementById('color-popover');
 const translateButton = document.querySelector('.translate-button');
 const matrixOutput = document.getElementById('matrix-output');
 const matrixPlaceholder = document.getElementById('matrix-placeholder');
@@ -32,15 +34,58 @@ colorInput.addEventListener('input', () => {
     }
 });
 
+colorInput.addEventListener('focus', () => {
+    colorPopover.classList.add('is-open');
+    colorPopover.setAttribute('aria-hidden', 'false');
+});
+
+colorInput.addEventListener('click', () => {
+    colorPopover.classList.add('is-open');
+    colorPopover.setAttribute('aria-hidden', 'false');
+});
+
+document.addEventListener('click', (event) => {
+    if (event.target === colorInput || colorPopover.contains(event.target)) return;
+    colorPopover.classList.remove('is-open');
+    colorPopover.setAttribute('aria-hidden', 'true');
+});
+
+colorPopover.addEventListener('click', (event) => {
+    const swatch = event.target.closest('.swatch');
+    if (!swatch) return;
+    const value = swatch.dataset.color;
+    if (!value) return;
+    currentColor = value;
+    colorInput.value = value;
+    colorInput.style.backgroundColor = hexToRgba(value, 0.25);
+});
+
+colorPopover.addEventListener('click', (event) => {
+    const addButton = event.target.closest('.add-swatch');
+    if (!addButton) return;
+    if (!currentColor) return;
+    const existing = colorPopover.querySelector(`[data-color="${currentColor}"]`);
+    if (existing) return;
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch';
+    swatch.dataset.color = currentColor;
+    swatch.style.background = currentColor;
+    colorPopover.insertBefore(swatch, addButton);
+});
+
 eraserButton.addEventListener('click', () => {
     currentColor = null;
     colorInput.value = '';
     colorInput.style.backgroundColor = 'transparent';
 });
 
+nightVisionButton.addEventListener('click', () => {
+    gridCanvas.classList.toggle('night-vision');
+});
+
 translateButton.addEventListener('click', () => {
     const { matrix, palette } = buildColorMatrix();
-    matrixOutput.textContent = JSON.stringify({ palette, matrix }, null, 2);
+    matrixOutput.textContent = formatMatrixOutput(matrix, palette);
     matrixPlaceholder.style.display = 'none';
     matrixOutput.style.display = 'block';
 });
@@ -119,6 +164,25 @@ function buildColorMatrix() {
     }
 
     return { matrix, palette };
+}
+
+function formatMatrixOutput(matrix, palette) {
+    const lines = [];
+    lines.push('palette: {');
+    const paletteEntries = Object.entries(palette);
+    paletteEntries.forEach(([key, value], index) => {
+        const comma = index === paletteEntries.length - 1 ? '' : ',';
+        lines.push(`  ${key}: "${value}"${comma}`);
+    });
+    lines.push('}');
+    lines.push('');
+    lines.push('grid: [');
+    matrix.forEach((row, index) => {
+        const comma = index === matrix.length - 1 ? '' : ',';
+        lines.push(`  [${row.join(', ')}]${comma}`);
+    });
+    lines.push(']');
+    return lines.join('\n');
 }
 
 function isValidHexColor(value) {

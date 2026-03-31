@@ -16,14 +16,27 @@
                 </label>
                 <label>
                     Height
-                    <input type="number" name="grid-height" min="1" value="3">
+                    <input type="number" name="grid-height" min="1" value="8">
                 </label>
                 <button type="submit">Create Grid</button>
                 <label>
                     Current Color
                     <input type="text" name="current-color" placeholder="#000000">
+                    <div class="color-popover" id="color-popover" aria-hidden="true">
+                        <div class="swatch" data-color="#e8cfa6" style="background:#e8cfa6"></div>
+                        <div class="swatch" data-color="#eac085" style="background:#eac085"></div>
+                        <div class="swatch" data-color="#ada171" style="background:#ada171"></div>
+                        <div class="swatch" data-color="#609436" style="background:#609436"></div>
+                        <div class="swatch" data-color="#4c9cd3" style="background:#4c9cd3"></div>
+                        <div class="swatch" data-color="#f3e5c6" style="background:#f3e5c6"></div>
+                        <div class="swatch" data-color="#cadbe0" style="background:#cadbe0"></div>
+                    <div class="swatch" data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc;"></div>
+                    <div class="swatch" data-color="#000000" style="background:#000000"></div>
+                    <button type="button" class="add-swatch" title="Add current color">+</button>
+                </div>
                 </label>
                 <button type="button" class="eraser-button">Eraser</button>
+                <button type="button" class="night-vision-button" title="Night Vision">🏮</button>
             </form>
             <div class="grid-panel">
                 <div class="grid-placeholder">Grid editor goes here</div>

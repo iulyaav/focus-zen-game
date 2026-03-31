@@ -37,6 +37,7 @@ body {
     flex-wrap: wrap;
     gap: 12px;
     align-items: flex-end;
+    position: relative;
 }
 
 .grid-controls label {
@@ -44,6 +45,7 @@ body {
     flex-direction: column;
     gap: 6px;
     font-size: 14px;
+    position: relative;
 }
 
 .grid-controls input {
@@ -56,6 +58,45 @@ body {
 
 .grid-controls input[name="current-color"] {
     width: 140px;
+}
+
+.color-popover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 6px;
+    display: none;
+    grid-template-columns: repeat(6, 24px);
+    gap: 6px;
+    padding: 8px;
+    background: #fff;
+    border: 2px solid #222;
+    box-shadow: 2px 2px 0 #222;
+    z-index: 10;
+}
+
+.color-popover.is-open {
+    display: grid;
+}
+
+.color-popover .swatch {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #222;
+    cursor: pointer;
+}
+
+.color-popover .add-swatch {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #222;
+    background: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
 }
 
 .grid-controls button {
@@ -74,6 +115,15 @@ body {
 }
 
 .grid-controls .eraser-button:hover {
+    background: #f2f2f2;
+}
+
+.grid-controls .night-vision-button {
+    background: #fff;
+    color: #222;
+}
+
+.grid-controls .night-vision-button:hover {
     background: #f2f2f2;
 }
 
@@ -138,6 +188,10 @@ body {
     border: 1px solid #ddd;
     background: #fff;
     aspect-ratio: 1 / 1;
+}
+
+.grid-canvas.night-vision .grid-cell {
+    background: #000;
 }
 
 .placeholder {
