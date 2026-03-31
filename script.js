@@ -46,6 +46,7 @@ const flowerSystem = createFlowerSystem();
 resizeCanvas();
 renderScene();
 updateHud();
+startSkyAnimation();
 
 // Listen for the space bar
 window.addEventListener('keydown', (e) => {
@@ -163,6 +164,16 @@ function startWelcomeScreenFade() {
     requestAnimationFrame(tick);
 }
 
+function startSkyAnimation() {
+    setInterval(() => {
+        if (welcomeScreen.active) return;
+        const seasonName = seasons[seasonIndex];
+        if (seasonName !== 'Spring') return;
+        updateSpringSky(skyPlane, cellSize);
+        renderScene();
+    }, 166);
+}
+
 function updateGarden() {
     console.log("Day passed:", days);
     drawGarden();
@@ -278,7 +289,7 @@ function drawBackground() {
     // Sky
     const seasonName = seasons[seasonIndex];
     const drawSky = seasonSkies[seasonName] || drawSpringSky;
-    drawSky(ctx, skyPlane);
+    drawSky(ctx, skyPlane, cellSize);
 
     // Ground
     ctx.fillStyle = groundPlane.color;
