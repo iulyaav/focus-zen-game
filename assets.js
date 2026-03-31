@@ -28,6 +28,40 @@ const ASSETS = {
             3: '#8d5f34',
         },
     },
+    grassA: {
+        anchor: { x: 1, y: 1 },
+        grid: [
+            [1, 0, 1],
+            [0, 1, 0],
+        ],
+        palette: {
+            1: '#609436',
+        },
+    },
+    grassB: {
+        anchor: { x: 2, y: 3 },
+        grid: [
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 1],
+            [0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0],
+        ],
+        palette: {
+            1: '#609436',
+        },
+    },
+    grassC: {
+        anchor: { x: 1, y: 1 },
+        grid: [
+            [0, 1, 0],
+            [1, 2, 1],
+            [0, 1, 0],
+        ],
+        palette: {
+            1: '#ffffff',
+            2: '#fdca09',
+        },
+    },
 };
 
 function drawAsset(ctx, asset, worldX, worldY, cellSize) {

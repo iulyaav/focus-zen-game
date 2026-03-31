@@ -27,8 +27,8 @@ let skyPlane = null;
 let groundPlane = null;
 const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 const showGridLines = false;
-const grassColor = '#609436';
-let grassBlades = [];
+let grassInstances = [];
+const grassAssets = [ASSETS.grassA, ASSETS.grassB, ASSETS.grassC];
 const fenceHeight = 7;
 const fenceTopOffset = -2;
 const burrowSystem = createBurrowSystem({
@@ -91,7 +91,7 @@ function resizeCanvas() {
     gridOffsetY = (canvas.height - gridPixelHeight) / 2;
 
     updatePlanes();
-    if (grassBlades.length === 0) {
+    if (grassInstances.length === 0) {
         generateGrass();
     }
     if (!burrowSystem.hasBurrows()) {
@@ -130,7 +130,7 @@ function updatePlanes() {
         y: skyHeight,
         width: gridPixelWidth,
         height: gridPixelHeight - skyHeight,
-        color: '#c0d46f',
+        color: '#acde7a',
         gridHeight: GRID_HEIGHT - skyGridHeight,
     };
 }
@@ -234,29 +234,65 @@ function drawPixelRect(gridX, gridY, gridWidth, gridHeight, color) {
 function generateGrass() {
     const groundRowStart = Math.max(skyPlane.gridHeight, getFenceTopRow() + fenceHeight);
     const groundRowCount = groundPlane.gridHeight;
-    const totalGroundCells = GRID_WIDTH * groundRowCount;
-    const bladeCount = Math.max(1, Math.floor(totalGroundCells * 0.06));
+    const grassCount = 11;
 
-    grassBlades = [];
-    for (let i = 0; i < bladeCount; i++) {
-        const height = Math.random() < 0.5 ? 1 : 2;
-        const x = Math.floor(Math.random() * GRID_WIDTH);
-        const yMin = groundRowStart + height - 1;
-        const y = yMin + Math.floor(Math.random() * (groundRowCount - (height - 1)));
-        grassBlades.push({ x, y, height });
+    grassInstances = [];
+    const occupied = new Set();
+    for (let i = 0; i < grassCount; i++) {
+        const asset = pickGrassAssetByCount(i);
+        const placement = createGroundAssetPlacement(asset, groundRowStart, groundRowCount, occupied);
+        if (!placement) continue;
+        grassInstances.push({ asset, x: placement.x, y: placement.y });
+        markOccupied(asset, placement, occupied);
     }
 }
 
 function drawGrass() {
-    ctx.fillStyle = grassColor;
-    grassBlades.forEach(blade => {
-        const startY = (blade.y - blade.height + 1) * cellSize;
-        ctx.fillRect(
-            blade.x * cellSize,
-            startY,
-            cellSize,
-            blade.height * cellSize
-        );
+    grassInstances.forEach(instance => {
+        drawAsset(ctx, instance.asset, instance.x, instance.y, cellSize);
+    });
+}
+
+function createGroundAssetPlacement(asset, groundRowStart, groundRowCount, occupied) {
+    const assetWidth = asset.grid[0].length;
+    const assetHeight = asset.grid.length;
+    const minX = asset.anchor.x;
+    const maxX = GRID_WIDTH - (assetWidth - asset.anchor.x) - 1;
+    const minY = groundRowStart + asset.anchor.y;
+    const maxY = groundRowStart + groundRowCount - (assetHeight - asset.anchor.y) - 1;
+
+    if (maxX < minX || maxY < minY) {
+        return null;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+    while (attempts < maxAttempts) {
+        const x = minX + Math.floor(Math.random() * (maxX - minX + 1));
+        const y = minY + Math.floor(Math.random() * (maxY - minY + 1));
+        if (isPlacementFree(asset, { x, y }, occupied)) {
+            return { x, y };
+        }
+        attempts++;
+    }
+    return null;
+}
+
+function pickGrassAssetByCount(index) {
+    if (index < 5) return ASSETS.grassA;
+    if (index < 8) return ASSETS.grassB;
+    return ASSETS.grassC;
+}
+
+function isPlacementFree(asset, placement, occupied) {
+    const cells = getAssetCells(asset, placement.x, placement.y);
+    return cells.every(cell => !occupied.has(`${cell.x},${cell.y}`));
+}
+
+function markOccupied(asset, placement, occupied) {
+    const cells = getAssetCells(asset, placement.x, placement.y);
+    cells.forEach(cell => {
+        occupied.add(`${cell.x},${cell.y}`);
     });
 }
 
