@@ -3,8 +3,9 @@ function createBurrowSystem({
     gridHeight,
     fenceHeight,
     getFenceTopRow,
-    drawPixelRect,
-    color = '#d69e60',
+    drawAsset,
+    getAssetCells,
+    asset,
 } = {}) {
     let burrows = [];
 
@@ -43,68 +44,33 @@ function createBurrowSystem({
         return burrows;
     }
 
-    function draw() {
-        burrows.forEach(burrow => drawBurrow(burrow.x, burrow.y));
-    }
-
     function createGroundBurrow() {
         const fenceTopRow = getFenceTopRow();
         const groundStartRow = Math.min(gridHeight, fenceTopRow + fenceHeight);
         const availableRows = Math.max(0, gridHeight - groundStartRow);
-        const shapeHeight = 3;
-        const shapeHalfWidth = 2;
+        const assetWidth = asset.grid[0].length;
+        const assetHeight = asset.grid.length;
+        const minX = asset.anchor.x;
+        const maxX = gridWidth - (assetWidth - asset.anchor.x) - 1;
+        const minY = groundStartRow + asset.anchor.y;
+        const maxY = groundStartRow + availableRows - (assetHeight - asset.anchor.y) - 1;
 
-        const x = shapeHalfWidth + Math.floor(Math.random() * (gridWidth - shapeHalfWidth * 2));
-        const y = groundStartRow + shapeHeight + Math.floor(Math.random() * (availableRows - shapeHeight - 1));
+        const x = minX + Math.floor(Math.random() * Math.max(1, maxX - minX + 1));
+        const y = minY + Math.floor(Math.random() * Math.max(1, maxY - minY + 1));
         return { x, y };
     }
 
     function isBurrowPlacementValid(candidate) {
         const occupied = new Set();
         burrows.forEach(burrow => {
-            getBurrowCells(burrow.x, burrow.y).forEach(cell => {
+            getAssetCells(asset, burrow.x, burrow.y).forEach(cell => {
                 occupied.add(`${cell.x},${cell.y}`);
             });
         });
 
-        return getBurrowCells(candidate.x, candidate.y).every(cell => {
+        return getAssetCells(asset, candidate.x, candidate.y).every(cell => {
             return !occupied.has(`${cell.x},${cell.y}`);
         });
-    }
-
-    function getBurrowCells(centerX, centerY) {
-        return [
-            { x: centerX - 1, y: centerY - 1 },
-            { x: centerX, y: centerY - 1 },
-            { x: centerX + 1, y: centerY - 1 },
-            { x: centerX - 2, y: centerY },
-            { x: centerX - 1, y: centerY },
-            { x: centerX, y: centerY },
-            { x: centerX + 1, y: centerY },
-            { x: centerX + 2, y: centerY },
-            { x: centerX - 1, y: centerY + 1 },
-            { x: centerX, y: centerY + 1 },
-            { x: centerX + 1, y: centerY + 1 },
-        ];
-    }
-
-    function drawBurrow(centerX, centerY) {
-        const rows = [
-            { y: centerY - 1, halfWidth: 1 },
-            { y: centerY, halfWidth: 2 },
-            { y: centerY + 1, halfWidth: 1 },
-        ];
-
-        rows.forEach(row => {
-            drawPixelRect(
-                centerX - row.halfWidth,
-                row.y,
-                row.halfWidth * 2 + 1,
-                1,
-                color
-            );
-        });
-        drawPixelRect(centerX, centerY, 1, 1, color);
     }
 
     return {
@@ -112,7 +78,11 @@ function createBurrowSystem({
         addSeasonal,
         hasBurrows,
         getBurrows,
-        draw,
+        draw(ctx, cellSize) {
+            burrows.forEach(burrow => {
+                drawAsset(ctx, asset, burrow.x, burrow.y, cellSize);
+            });
+        },
     };
 }
 

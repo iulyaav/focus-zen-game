@@ -31,7 +31,9 @@ const burrowSystem = createBurrowSystem({
     gridHeight: GRID_HEIGHT,
     fenceHeight,
     getFenceTopRow,
-    drawPixelRect,
+    drawAsset,
+    getAssetCells,
+    asset: ASSETS.burrow,
 });
 const flowerSystem = createFlowerSystem();
 
@@ -167,7 +169,7 @@ function drawWorld() {
 }
 
 function drawGarden() {
-    burrowSystem.draw();
+    burrowSystem.draw(ctx, cellSize);
 }
 
 function drawWelcomeOverlay() {
