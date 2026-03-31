@@ -1,0 +1,158 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: serif;
+    background: #f5f1e9;
+    color: #222;
+}
+
+.builder {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    min-height: 100vh;
+}
+
+.panel {
+    background: #ffffff;
+    border: 2px solid #222;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.panel h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.grid-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.grid-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.grid-controls input {
+    padding: 6px 8px;
+    border: 2px solid #222;
+    font-family: inherit;
+    font-size: 14px;
+    width: 120px;
+}
+
+.grid-controls input[name="current-color"] {
+    width: 140px;
+}
+
+.grid-controls button {
+    padding: 8px 12px;
+    border: 2px solid #222;
+    background: #222;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.grid-controls .eraser-button {
+    background: #fff;
+    color: #222;
+}
+
+.grid-controls .eraser-button:hover {
+    background: #f2f2f2;
+}
+
+.grid-controls button:hover {
+    background: #333;
+}
+
+.translate-button {
+    padding: 8px 12px;
+    border: 2px solid #222;
+    background: #222;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.translate-button:hover {
+    background: #333;
+}
+
+.matrix-output {
+    flex: 1;
+    margin: 0;
+    padding: 12px;
+    border: 2px dashed #999;
+    background: #f9f9f9;
+    font-size: 14px;
+    white-space: pre-wrap;
+    display: none;
+}
+
+.grid-panel {
+    flex: 1;
+    border: 2px dashed #999;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 16px;
+    position: relative;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.grid-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-canvas {
+    display: grid;
+    gap: 2px;
+}
+
+.grid-cell {
+    border: 1px solid #ddd;
+    background: #fff;
+    aspect-ratio: 1 / 1;
+}
+
+.placeholder {
+    flex: 1;
+    border: 2px dashed #999;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 16px;
+}
+
+@media (max-width: 900px) {
+    .builder {
+        grid-template-columns: 1fr;
+    }
+}

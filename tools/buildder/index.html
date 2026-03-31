@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asset Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="builder">
+        <section class="panel left">
+            <h1>Pixel Grid</h1>
+            <form class="grid-controls">
+                <label>
+                    Width
+                    <input type="number" name="grid-width" min="1" value="8">
+                </label>
+                <label>
+                    Height
+                    <input type="number" name="grid-height" min="1" value="3">
+                </label>
+                <button type="submit">Create Grid</button>
+                <label>
+                    Current Color
+                    <input type="text" name="current-color" placeholder="#000000">
+                </label>
+                <button type="button" class="eraser-button">Eraser</button>
+            </form>
+            <div class="grid-panel">
+                <div class="grid-placeholder">Grid editor goes here</div>
+                <div class="grid-canvas" id="grid-canvas"></div>
+            </div>
+        </section>
+        <section class="panel right">
+            <h1>Matrix Output</h1>
+            <button type="button" class="translate-button">Translate</button>
+            <div class="placeholder" id="matrix-placeholder">Matrix preview goes here</div>
+            <pre class="matrix-output" id="matrix-output"></pre>
+        </section>
+    </div>
+    <script src="builder.js"></script>
+</body>
+</html>
