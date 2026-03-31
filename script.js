@@ -9,6 +9,12 @@ let year = 1;
 let clicks = 0;
 const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
 let seasonIndex = 0;
+const seasonSkies = {
+    Spring: drawSpringSky,
+    Summer: drawSummerSky,
+    Autumn: drawAutumnSky,
+    Winter: drawWinterSky,
+};
 
 const GRID_WIDTH = 160;
 const GRID_HEIGHT = 90;
@@ -47,7 +53,9 @@ window.addEventListener('keydown', (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (welcomeScreen.active) {
-            startWelcomeScreenFade();
+            if (!welcomeScreen.fading) {
+                startWelcomeScreenFade();
+            }
             return;
         }
         clicks++;
@@ -60,6 +68,7 @@ window.addEventListener('keydown', (e) => {
 
         flowerSystem.updateAll();
         updateGarden();
+        renderScene();
     }
 });
 
@@ -137,6 +146,7 @@ function advanceSeason() {
         flowerSystem.addForBurrow(index);
     });
     updateHud();
+    renderScene();
 }
 
 function startWelcomeScreenFade() {
@@ -266,25 +276,13 @@ function drawGrid(stepX, stepY) {
 
 function drawBackground() {
     // Sky
-    drawPixelSky(skyPlane);
+    const seasonName = seasons[seasonIndex];
+    const drawSky = seasonSkies[seasonName] || drawSpringSky;
+    drawSky(ctx, skyPlane);
 
     // Ground
     ctx.fillStyle = groundPlane.color;
     ctx.fillRect(groundPlane.x, groundPlane.y, groundPlane.width, groundPlane.height);
-}
-
-function drawPixelSky(plane) {
-    const palette = ['#9cd9f0', '#8ecae6', '#7bb6d6', '#6aa6c9'];
-    const bandHeight = Math.max(1, Math.floor(plane.height / palette.length));
-
-    for (let i = 0; i < palette.length; i++) {
-        ctx.fillStyle = palette[i];
-        const y = plane.y + i * bandHeight;
-        const height = i === palette.length - 1
-            ? plane.height - i * bandHeight
-            : bandHeight;
-        ctx.fillRect(plane.x, y, plane.width, height);
-    }
 }
 
 function drawCell(gridX, gridY, color) {

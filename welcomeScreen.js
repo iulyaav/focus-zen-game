@@ -7,6 +7,7 @@ function createWelcomeScreen({ durationMs = 1200 } = {}) {
         fading: false,
         startFade() {
             if (!this.active) return;
+            if (this.fading) return;
             this.startTime = null;
             this.fading = true;
         },
