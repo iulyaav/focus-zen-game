@@ -208,6 +208,19 @@ function drawWelcomeOverlay() {
     welcomeScreen.draw(ctx, canvas.width, canvas.height);
 }
 
+function drawFlowers() {
+    const burrows = burrowSystem.getBurrows();
+    const flowers = flowerSystem.getFlowers();
+    flowers.forEach(flower => {
+        if (!flower.alive) return;
+        const burrow = burrows[flower.burrowIndex];
+        const asset = ASSETS[flower.asset];
+        if (!burrow || !asset) return;
+        // Align flower anchor directly to burrow anchor.
+        drawAsset(ctx, asset, burrow.x, burrow.y, cellSize);
+    });
+}
+
 function getFenceTopRow() {
     return skyPlane.gridHeight + fenceTopOffset;
 }

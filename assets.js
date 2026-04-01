@@ -64,8 +64,7 @@ const ASSETS = {
         },
     },
     snowdrop: {
-        anchor: { x: 3, y: 2 },
-        stem: {x: 4, y: 5},
+        anchor: { x: 4, y: 5 },
         grid: [
             [0, 0, 0, 1, 0, 0, 0, 0],
             [0, 0, 2, 0, 1, 0, 0, 0],
