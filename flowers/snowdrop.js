@@ -1,4 +1,4 @@
-const FLOWER_ASSETS = {
+export const FLOWER_ASSETS = {
     snowdrop: {
         anchor: { x: 4, y: 5 },
         grid: [
@@ -28,5 +28,3 @@ const FLOWER_ASSETS = {
         },
     },
 };
-
-window.FLOWER_ASSETS = FLOWER_ASSETS;

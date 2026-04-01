@@ -6,7 +6,7 @@ const springSkyState = {
     lastPlaneHeight: null,
 };
 
-function drawSpringSky(ctx, plane, cellSize) {
+export function drawSpringSky(ctx, plane, cellSize) {
     const palette = ['#9cd9f0', '#8ecae6', '#7bb6d6', '#6aa6c9'];
     const bandHeight = Math.max(1, Math.floor(plane.height / palette.length));
 
@@ -147,7 +147,7 @@ function createCloudB() {
     };
 }
 
-function updateSpringSky(plane, cellSize) {
+export function updateSpringSky(plane, cellSize) {
     if (!cellSize) return;
     const maxCols = Math.floor(plane.width / cellSize);
     springSkyState.cloudsA.forEach(cloud => {
@@ -170,6 +170,3 @@ function updateSpringSky(plane, cellSize) {
     });
 
 }
-
-window.drawSpringSky = drawSpringSky;
-window.updateSpringSky = updateSpringSky;

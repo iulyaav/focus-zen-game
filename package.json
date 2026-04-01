@@ -1,0 +1,7 @@
+{
+  "name": "focus-zen-game",
+  "private": true,
+  "scripts": {
+    "dev": "node tools/dev-server.mjs"
+  }
+}

@@ -1,3 +1,5 @@
+import { FLOWER_ASSETS } from './flowers/snowdrop.js';
+
 const ASSETS = {
     burrow: {
         anchor: { x: 3, y: 1 },
@@ -65,7 +67,7 @@ const ASSETS = {
     },
 };
 
-Object.assign(ASSETS, window.FLOWER_ASSETS || {});
+Object.assign(ASSETS, FLOWER_ASSETS || {});
 
 function drawAsset(ctx, asset, worldX, worldY, cellSize) {
     for (let y = 0; y < asset.grid.length; y++) {
@@ -103,6 +105,4 @@ function getAssetCells(asset, worldX, worldY) {
     return cells;
 }
 
-window.ASSETS = ASSETS;
-window.drawAsset = drawAsset;
-window.getAssetCells = getAssetCells;
+export { ASSETS, drawAsset, getAssetCells };

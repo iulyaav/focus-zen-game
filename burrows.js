@@ -1,4 +1,4 @@
-function createBurrowSystem({
+export function createBurrowSystem({
     gridWidth,
     gridHeight,
     fenceHeight,
@@ -85,5 +85,3 @@ function createBurrowSystem({
         },
     };
 }
-
-window.createBurrowSystem = createBurrowSystem;

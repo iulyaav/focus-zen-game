@@ -1,3 +1,12 @@
+import { ASSETS, drawAsset, getAssetCells } from './assets.js';
+import { createBurrowSystem } from './burrows.js';
+import { createFlowerSystem } from './flowers.js';
+import { createWelcomeScreen } from './welcomeScreen.js';
+import { drawSpringSky, updateSpringSky } from './seasons/spring.js';
+import { drawSummerSky } from './seasons/summer.js';
+import { drawAutumnSky } from './seasons/autumn.js';
+import { drawWinterSky } from './seasons/winter.js';
+
 const canvas = document.getElementById('gardenCanvas');
 const ctx = canvas.getContext('2d');
 const dayDisplay = document.getElementById('day-counter');

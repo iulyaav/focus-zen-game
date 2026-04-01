@@ -1,4 +1,4 @@
-function createWelcomeScreen({ durationMs = 1200 } = {}) {
+export function createWelcomeScreen({ durationMs = 1200 } = {}) {
     return {
         durationMs,
         startTime: null,
@@ -40,5 +40,3 @@ function createWelcomeScreen({ durationMs = 1200 } = {}) {
         },
     };
 }
-
-window.createWelcomeScreen = createWelcomeScreen;

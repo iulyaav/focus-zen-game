@@ -1,4 +1,4 @@
-function createFlowerSystem() {
+export function createFlowerSystem() {
     const flowers = [];
     const flowerTypes = {
         snowdrop: {
@@ -86,5 +86,3 @@ function createFlowerSystem() {
         getFlowers,
     };
 }
-
-window.createFlowerSystem = createFlowerSystem;
