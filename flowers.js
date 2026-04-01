@@ -6,16 +6,30 @@ function createFlowerSystem() {
         { name: 'full-bloom', duration: 3 },
         { name: 'decay', duration: 2 },
     ];
+    const flowerTypes = {
+        snowdrop: {
+            season: 'Spring',
+            asset: 'snowdrop',
+            stem: [5, 4],
+            stages,
+        },
+    };
 
-    function initForBurrows(count) {
+    function initForBurrows(count, type = 'snowdrop') {
         flowers.length = 0;
         for (let i = 0; i < count; i++) {
-            flowers.push(createGenericFlower(i));
+            flowers.push(createGenericFlower(i, type));
         }
     }
 
-    function addForBurrow(burrowIndex) {
-        flowers.push(createGenericFlower(burrowIndex));
+    function plantOneRandom(burrowCount, type = 'snowdrop') {
+        if (burrowCount <= 0) return;
+        const burrowIndex = Math.floor(Math.random() * burrowCount);
+        flowers.push(createGenericFlower(burrowIndex, type));
+    }
+
+    function addForBurrow(burrowIndex, type = 'snowdrop') {
+        flowers.push(createGenericFlower(burrowIndex, type));
     }
 
     function updateAll() {
@@ -34,9 +48,13 @@ function createFlowerSystem() {
         return flowers;
     }
 
-    function createGenericFlower(burrowIndex) {
+    function createGenericFlower(burrowIndex, type) {
+        const definition = flowerTypes[type] || {};
         return {
-            type: 'generic',
+            type,
+            season: definition.season || 'Spring',
+            asset: definition.asset || null,
+            stem: definition.stem || null,
             burrowIndex,
             age: 0,
             stageIndex: 0,
@@ -59,6 +77,7 @@ function createFlowerSystem() {
 
     return {
         initForBurrows,
+        plantOneRandom,
         addForBurrow,
         updateAll,
         getFlowers,

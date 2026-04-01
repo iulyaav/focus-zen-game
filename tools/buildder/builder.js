@@ -34,6 +34,12 @@ colorInput.addEventListener('input', () => {
     }
 });
 
+colorInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+    }
+});
+
 colorInput.addEventListener('focus', () => {
     colorPopover.classList.add('is-open');
     colorPopover.setAttribute('aria-hidden', 'false');

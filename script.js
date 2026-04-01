@@ -96,7 +96,8 @@ function resizeCanvas() {
     }
     if (!burrowSystem.hasBurrows()) {
         burrowSystem.generateInitial(6);
-        flowerSystem.initForBurrows(burrowSystem.getBurrows().length);
+        flowerSystem.initForBurrows(0);
+        flowerSystem.plantOneRandom(burrowSystem.getBurrows().length);
     }
     renderScene();
 }
@@ -200,6 +201,7 @@ function drawWorld() {
 
 function drawGarden() {
     burrowSystem.draw(ctx, cellSize);
+    drawFlowers();
 }
 
 function drawWelcomeOverlay() {
