@@ -79,6 +79,18 @@ const ASSETS = {
             3: '#c7eefa',
         },
     },
+    snowdropStage1: {
+        anchor: { x: 1, y: 2 },
+        grid: [
+            [0, 1, 0],
+            [1, 1, 0],
+            [2, 2, 2],
+        ],
+        palette: {
+            1: '#8dcf45',
+            2: '#567c2e',
+        },
+    },
 };
 
 function drawAsset(ctx, asset, worldX, worldY, cellSize) {

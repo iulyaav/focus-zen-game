@@ -1,17 +1,12 @@
 function createFlowerSystem() {
     const flowers = [];
-    const stages = [
-        { name: 'sprout', duration: 2 },
-        { name: 'half-grown', duration: 3 },
-        { name: 'full-bloom', duration: 3 },
-        { name: 'decay', duration: 2 },
-    ];
     const flowerTypes = {
         snowdrop: {
             season: 'Spring',
-            asset: 'snowdrop',
-            stem: [5, 4],
-            stages,
+            stages: [
+                { name: 'stage1', duration: 3, asset: 'snowdropStage1' },
+                { name: 'stage2', duration: 5, asset: 'snowdrop' },
+            ],
         },
     };
 
@@ -50,11 +45,11 @@ function createFlowerSystem() {
 
     function createGenericFlower(burrowIndex, type) {
         const definition = flowerTypes[type] || {};
+        const stageAsset = definition.stages?.[0]?.asset || null;
         return {
             type,
             season: definition.season || 'Spring',
-            asset: definition.asset || null,
-            stem: definition.stem || null,
+            asset: stageAsset,
             burrowIndex,
             age: 0,
             stageIndex: 0,
@@ -64,6 +59,8 @@ function createFlowerSystem() {
 
     function advanceStageIfNeeded(flower) {
         if (!flower.alive) return;
+        const definition = flowerTypes[flower.type];
+        const stages = definition?.stages || [];
         const stage = stages[flower.stageIndex];
         if (flower.age < stage.duration) return;
 
@@ -72,7 +69,10 @@ function createFlowerSystem() {
 
         if (flower.stageIndex >= stages.length) {
             flower.alive = false;
+            flower.asset = null;
+            return;
         }
+        flower.asset = stages[flower.stageIndex].asset || flower.asset;
     }
 
     return {
