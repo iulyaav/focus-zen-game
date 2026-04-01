@@ -17,10 +17,13 @@ function createFlowerSystem() {
         }
     }
 
-    function plantOneRandom(burrowCount, type = 'snowdrop') {
+    function plantRandom(burrowCount, type = 'snowdrop', min = 1, max = 3) {
         if (burrowCount <= 0) return;
-        const burrowIndex = Math.floor(Math.random() * burrowCount);
-        flowers.push(createGenericFlower(burrowIndex, type));
+        const count = min + Math.floor(Math.random() * (max - min + 1));
+        for (let i = 0; i < count; i++) {
+            const burrowIndex = Math.floor(Math.random() * burrowCount);
+            flowers.push(createGenericFlower(burrowIndex, type));
+        }
     }
 
     function addForBurrow(burrowIndex, type = 'snowdrop') {
@@ -77,7 +80,7 @@ function createFlowerSystem() {
 
     return {
         initForBurrows,
-        plantOneRandom,
+        plantRandom,
         addForBurrow,
         updateAll,
         getFlowers,

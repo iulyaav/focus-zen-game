@@ -97,7 +97,7 @@ function resizeCanvas() {
     if (!burrowSystem.hasBurrows()) {
         burrowSystem.generateInitial(6);
         flowerSystem.initForBurrows(0);
-        flowerSystem.plantOneRandom(burrowSystem.getBurrows().length);
+        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
     }
     renderScene();
 }
@@ -151,6 +151,7 @@ function advanceSeason() {
     newIndices.forEach(index => {
         flowerSystem.addForBurrow(index);
     });
+    flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
     updateHud();
     renderScene();
 }
