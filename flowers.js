@@ -13,7 +13,7 @@ export function createFlowerSystem() {
             season: 'Spring',
             lastPossibleDay: 30,
             stages: [
-                { name: 'stage1', duration: 5, asset: 'tulipStage1' },
+                { name: 'stage1', duration: 10, asset: 'tulipStage1' },
             ],
         },
         yellowTulip: {

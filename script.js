@@ -120,7 +120,7 @@ function resizeCanvas() {
         generateGrass();
     }
     if (!burrowSystem.hasBurrows()) {
-        burrowSystem.generateInitial(6);
+        burrowSystem.generateInitial(10);
         flowerSystem.initForBurrows(0);
         const seasonName = seasons[seasonIndex];
         if (seasonName === 'Spring') {
@@ -182,7 +182,7 @@ function advanceSeason() {
     const seasonName = seasons[seasonIndex];
     const isSpringReset = previousSeason === 'Winter' && seasonName === 'Spring';
     if (isSpringReset) {
-        burrowSystem.generateInitial(6);
+        burrowSystem.generateInitial(10);
         flowerSystem.initForBurrows(0);
         generateGrass();
         seededInitialEmptyBurrows = false;

@@ -11,8 +11,16 @@ export function createBurrowSystem({
 
     function generateInitial(count = 6) {
         burrows = [];
-        for (let i = 0; i < count; i++) {
-            burrows.push(createGroundBurrow());
+        let placed = 0;
+        let attempts = 0;
+        const maxAttempts = count * 20;
+        while (placed < count && attempts < maxAttempts) {
+            const candidate = createGroundBurrow();
+            if (isBurrowPlacementValid(candidate)) {
+                burrows.push(candidate);
+                placed += 1;
+            }
+            attempts += 1;
         }
     }
 
