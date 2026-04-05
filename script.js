@@ -24,6 +24,12 @@ const seasonSkies = {
     Autumn: drawAutumnSky,
     Winter: drawWinterSky,
 };
+const groundColors = {
+    Spring: '#acde7a',
+    Summer: '#8bcc47',
+    Autumn: '#acde7a',
+    Winter: '#acde7a',
+};
 
 const GRID_WIDTH = 160;
 const GRID_HEIGHT = 90;
@@ -37,7 +43,6 @@ let groundPlane = null;
 const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 const showGridLines = false;
 let grassInstances = [];
-const grassAssets = [ASSETS.grassA, ASSETS.grassB, ASSETS.grassC];
 const fenceHeight = 7;
 const fenceTopOffset = -2;
 const burrowSystem = createBurrowSystem({
@@ -76,6 +81,9 @@ window.addEventListener('keydown', (e) => {
         }
 
         flowerSystem.updateAll();
+        if (days >= 5) {
+            plantForAvailableBurrows();
+        }
         updateGarden();
         renderScene();
     }
@@ -109,7 +117,8 @@ function resizeCanvas() {
         const seasonName = seasons[seasonIndex];
         if (seasonName === 'Spring') {
             flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'tulip', 1, 1);
+            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'redTulip', 0, 1);
+            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'yellowTulip', 0, 1);
         }
     }
     renderScene();
@@ -156,34 +165,65 @@ function updateHud() {
 }
 
 function advanceSeason() {
+    const previousSeason = seasons[seasonIndex];
     seasonIndex = (seasonIndex + 1) % seasons.length;
     if (seasonIndex === 0) {
         year++;
     }
     const seasonName = seasons[seasonIndex];
-    flowerSystem.pruneToSeason(seasonName);
+    const isSpringReset = previousSeason === 'Winter' && seasonName === 'Spring';
+    if (isSpringReset) {
+        burrowSystem.generateInitial(6);
+        flowerSystem.initForBurrows(0);
+        generateGrass();
+    } else {
+        flowerSystem.pruneToSeason(seasonName);
+        generateGrass();
+    }
+    const seasonFlowerMap = {
+        Spring: ['snowdrop', 'redTulip', 'yellowTulip'],
+        Summer: ['poppy'],
+        Autumn: [],
+        Winter: [],
+    };
+    const seasonFlowers = seasonFlowerMap[seasonName] || [];
+    if (!isSpringReset) {
+        const newIndices = burrowSystem.addSeasonal(1, 2);
+        newIndices.forEach(index => {
+            if (seasonFlowers.length === 0) return;
+            const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
+            flowerSystem.addForBurrow(index, type);
+        });
+    }
+        if (seasonName === 'Spring') {
+            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
+            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'redTulip', 0, 1);
+            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'yellowTulip', 0, 1);
+        }
+    if (seasonName === 'Summer') {
+        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'poppy', 1, 2);
+    }
+    updateHud();
+    renderScene();
+}
+
+function plantForAvailableBurrows() {
     const seasonFlowerMap = {
         Spring: ['snowdrop', 'tulip'],
         Summer: ['poppy'],
         Autumn: [],
         Winter: [],
     };
+    const seasonName = seasons[seasonIndex];
     const seasonFlowers = seasonFlowerMap[seasonName] || [];
-    const newIndices = burrowSystem.addSeasonal();
-    newIndices.forEach(index => {
-        if (seasonFlowers.length === 0) return;
+    if (seasonFlowers.length === 0) return;
+
+    const burrows = burrowSystem.getBurrows();
+    burrows.forEach((_, index) => {
+        if (flowerSystem.hasActiveFlowerAtBurrow(index)) return;
         const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
         flowerSystem.addForBurrow(index, type);
     });
-    if (seasonName === 'Spring') {
-        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
-        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'tulip', 1, 1);
-    }
-    if (seasonName === 'Summer') {
-        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'poppy', 1, 2);
-    }
-    updateHud();
-    renderScene();
 }
 
 function startWelcomeScreenFade() {
@@ -278,14 +318,15 @@ function drawPixelRect(gridX, gridY, gridWidth, gridHeight, color) {
 }
 
 function generateGrass() {
+    const seasonName = seasons[seasonIndex];
     const groundRowStart = Math.max(skyPlane.gridHeight, getFenceTopRow() + fenceHeight);
     const groundRowCount = groundPlane.gridHeight;
-    const grassCount = 11;
+    const grassCount = seasonName === 'Summer' ? 8 : 11;
 
     grassInstances = [];
     const occupied = new Set();
     for (let i = 0; i < grassCount; i++) {
-        const asset = pickGrassAssetByCount(i);
+        const asset = pickGrassAssetByCount(i, seasonName);
         const placement = createGroundAssetPlacement(asset, groundRowStart, groundRowCount, occupied);
         if (!placement) continue;
         grassInstances.push({ asset, x: placement.x, y: placement.y });
@@ -324,10 +365,15 @@ function createGroundAssetPlacement(asset, groundRowStart, groundRowCount, occup
     return null;
 }
 
-function pickGrassAssetByCount(index) {
-    if (index < 5) return ASSETS.grassA;
-    if (index < 8) return ASSETS.grassB;
-    return ASSETS.grassC;
+function pickGrassAssetByCount(index, seasonName) {
+    if (seasonName === 'Summer') {
+        if (index < 4) return ASSETS.summerGrass;
+        if (index < 7) return ASSETS.summerGrassB;
+        return ASSETS.summerGrassC;
+    }
+    if (index < 5) return ASSETS.springGrassA;
+    if (index < 8) return ASSETS.springGrassB;
+    return ASSETS.springGrassC;
 }
 
 function isPlacementFree(asset, placement, occupied) {
@@ -376,7 +422,7 @@ function drawBackgroundCanvas() {
 
     drawSky(ctx, skyPlaneCanvas, cellSize);
 
-    ctx.fillStyle = groundPlane.color;
+    ctx.fillStyle = groundColors[seasonName] || groundPlane.color;
     ctx.fillRect(0, horizonY - 1, canvas.width, canvas.height - horizonY + 1);
 }
 

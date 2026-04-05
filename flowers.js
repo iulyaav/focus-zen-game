@@ -8,16 +8,22 @@ export function createFlowerSystem() {
                 { name: 'stage2', duration: 5, asset: 'snowdrop' },
             ],
         },
-        tulip: {
+        redTulip: {
             season: 'Spring',
             stages: [
                 { name: 'stage1', duration: 5, asset: 'tulipStage1' },
             ],
         },
+        yellowTulip: {
+            season: 'Spring',
+            stages: [
+                { name: 'stage1', duration: 10, asset: 'tulipStage1Yellow' },
+            ],
+        },
         poppy: {
             season: 'Summer',
             stages: [
-                { name: 'stage1', duration: 5, asset: 'poppyStage1' },
+                { name: 'stage1', duration: 3, asset: 'poppyStage1' },
             ],
         },
     };
@@ -78,7 +84,8 @@ export function createFlowerSystem() {
 
     function createGenericFlower(burrowIndex, type) {
         const definition = flowerTypes[type] || {};
-        const stageAsset = definition.stages?.[0]?.asset || null;
+        const stageDefinition = definition.stages?.[0] || {};
+        const stageAsset = pickStageAsset(stageDefinition);
         return {
             type,
             season: definition.season || 'Spring',
@@ -105,7 +112,12 @@ export function createFlowerSystem() {
             flower.asset = null;
             return;
         }
-        flower.asset = stages[flower.stageIndex].asset || flower.asset;
+        flower.asset = pickStageAsset(stages[flower.stageIndex]) || flower.asset;
+    }
+
+    function pickStageAsset(stage) {
+        if (!stage) return null;
+        return stage.asset || null;
     }
 
     function hasActiveFlowerAtBurrow(burrowIndex) {
@@ -119,5 +131,6 @@ export function createFlowerSystem() {
         updateAll,
         getFlowers,
         pruneToSeason,
+        hasActiveFlowerAtBurrow,
     };
 }

@@ -33,7 +33,7 @@ const ASSETS = {
             3: '#8d5f34',
         },
     },
-    grassA: {
+    springGrassA: {
         anchor: { x: 1, y: 1 },
         grid: [
             [1, 0, 1],
@@ -43,7 +43,7 @@ const ASSETS = {
             1: '#609436',
         },
     },
-    grassB: {
+    springGrassB: {
         anchor: { x: 2, y: 3 },
         grid: [
             [1, 0, 0, 0, 0, 0],
@@ -55,7 +55,7 @@ const ASSETS = {
             1: '#609436',
         },
     },
-    grassC: {
+    springGrassC: {
         anchor: { x: 1, y: 1 },
         grid: [
             [0, 1, 0],
@@ -65,6 +65,45 @@ const ASSETS = {
         palette: {
             1: '#ffffff',
             2: '#fdca09',
+        },
+    },
+    summerGrass: {
+        anchor: { x: 3, y: 5 },
+        grid: [
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 1, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0],
+        ],
+        palette: {
+            1: '#6bb269',
+        },
+    },
+    summerGrassB: {
+        anchor: { x: 2, y: 4 },
+        grid: [
+            [0, 1, 0, 1, 0],
+            [1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1],
+            [0, 0, 1, 1, 0],
+            [0, 0, 1, 0, 0],
+        ],
+        palette: {
+            1: '#6bb269',
+        },
+    },
+    summerGrassC: {
+        anchor: { x: 3, y: 3 },
+        grid: [
+            [0, 0, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+        ],
+        palette: {
+            1: '#6bb269',
         },
     },
 };
