@@ -19,6 +19,31 @@
                     <input type="number" name="grid-height" min="1" value="8">
                 </label>
                 <button type="submit">Create Grid</button>
+                <details class="grid-edit">
+                    <summary>Grid Edit</summary>
+                    <div class="grid-edit-body">
+                        <div class="grid-edit-row">
+                            <label>
+                                Insert Column
+                                <input type="number" name="insert-col-index" min="1" value="1">
+                            </label>
+                            <div class="grid-edit-actions">
+                                <button type="button" class="insert-col-left-button">Left</button>
+                                <button type="button" class="insert-col-right-button">Right</button>
+                            </div>
+                        </div>
+                        <div class="grid-edit-row">
+                            <label>
+                                Insert Row
+                                <input type="number" name="insert-row-index" min="1" value="1">
+                            </label>
+                            <div class="grid-edit-actions">
+                                <button type="button" class="insert-row-above-button">Above</button>
+                                <button type="button" class="insert-row-below-button">Below</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
                 <label>
                     Current Color
                     <input type="text" name="current-color" placeholder="#000000">
@@ -47,8 +72,11 @@
             <h1>Matrix Output</h1>
             <div class="matrix-actions">
                 <button type="button" class="translate-button">Translate</button>
+                <button type="button" class="reverse-button">Reverse</button>
                 <button type="button" class="trim-button">Trim</button>
             </div>
+            <label class="matrix-input-label" for="matrix-input">Paste Matrix</label>
+            <textarea class="matrix-input" id="matrix-input" placeholder="Paste palette + grid here"></textarea>
             <div class="placeholder" id="matrix-placeholder">Matrix preview goes here</div>
             <pre class="matrix-output" id="matrix-output"></pre>
         </section>

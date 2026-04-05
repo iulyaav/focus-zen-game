@@ -121,7 +121,7 @@ function resizeCanvas() {
     }
     if (!burrowSystem.hasBurrows()) {
         burrowSystem.generateInitial(10);
-        flowerSystem.initForBurrows(0);
+        flowerSystem.initForBurrows(burrowSystem.getFenceRowCount(), 'snowdrop');
         const seasonName = seasons[seasonIndex];
         if (seasonName === 'Spring') {
             plantSeasonSeed('snowdrop', 1, 3);
@@ -183,7 +183,7 @@ function advanceSeason() {
     const isSpringReset = previousSeason === 'Winter' && seasonName === 'Spring';
     if (isSpringReset) {
         burrowSystem.generateInitial(10);
-        flowerSystem.initForBurrows(0);
+        flowerSystem.initForBurrows(burrowSystem.getFenceRowCount(), 'snowdrop');
         generateGrass();
         seededInitialEmptyBurrows = false;
     } else {
@@ -261,7 +261,10 @@ function plantSeasonSeed(type, min, max) {
     const definition = flowerSystem.getFlowerDefinition(type);
     const lastPossibleDay = definition?.lastPossibleDay ?? 30;
     if (seasonDay > lastPossibleDay) return;
-    flowerSystem.plantRandom(burrowSystem.getBurrows().length, type, min, max);
+    const fenceCount = burrowSystem.getFenceRowCount();
+    const totalBurrows = burrowSystem.getBurrows().length;
+    const groundCount = Math.max(0, totalBurrows - fenceCount);
+    flowerSystem.plantRandomWithOffset(groundCount, fenceCount, type, min, max);
 }
 
 function getCurrentSeasonDay() {

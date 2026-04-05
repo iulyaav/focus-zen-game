@@ -56,6 +56,23 @@ export function createFlowerSystem() {
         }
     }
 
+    function plantRandomWithOffset(burrowCount, indexOffset = 0, type = 'snowdrop', min = 1, max = 3) {
+        if (burrowCount <= 0) return;
+        const count = min + Math.floor(Math.random() * (max - min + 1));
+        let attempts = 0;
+        const maxAttempts = Math.max(count * 5, 10);
+        for (let i = 0; i < count; i++) {
+            if (attempts >= maxAttempts) break;
+            const burrowIndex = indexOffset + Math.floor(Math.random() * burrowCount);
+            attempts += 1;
+            if (hasActiveFlowerAtBurrow(burrowIndex)) {
+                i -= 1;
+                continue;
+            }
+            flowers.push(createGenericFlower(burrowIndex, type));
+        }
+    }
+
     function addForBurrow(burrowIndex, type = 'snowdrop') {
         if (hasActiveFlowerAtBurrow(burrowIndex)) return;
         flowers.push(createGenericFlower(burrowIndex, type));
@@ -135,6 +152,7 @@ export function createFlowerSystem() {
     return {
         initForBurrows,
         plantRandom,
+        plantRandomWithOffset,
         addForBurrow,
         updateAll,
         getFlowers,

@@ -7,9 +7,17 @@ const eraserButton = form.querySelector('.eraser-button');
 const nightVisionButton = form.querySelector('.night-vision-button');
 const colorPopover = document.getElementById('color-popover');
 const translateButton = document.querySelector('.translate-button');
+const reverseButton = document.querySelector('.reverse-button');
 const trimButton = document.querySelector('.trim-button');
+const matrixInput = document.getElementById('matrix-input');
 const matrixOutput = document.getElementById('matrix-output');
 const matrixPlaceholder = document.getElementById('matrix-placeholder');
+const insertColIndexInput = form.querySelector('input[name="insert-col-index"]');
+const insertRowIndexInput = form.querySelector('input[name="insert-row-index"]');
+const insertColLeftButton = form.querySelector('.insert-col-left-button');
+const insertColRightButton = form.querySelector('.insert-col-right-button');
+const insertRowAboveButton = form.querySelector('.insert-row-above-button');
+const insertRowBelowButton = form.querySelector('.insert-row-below-button');
 let currentColor = null;
 let currentGridSize = null;
 
@@ -97,12 +105,36 @@ translateButton.addEventListener('click', () => {
     matrixOutput.style.display = 'block';
 });
 
+reverseButton.addEventListener('click', () => {
+    const source = matrixInput.value.trim();
+    if (!source) return;
+    const { matrix, palette } = parseMatrixInput(source);
+    if (!matrix.length) return;
+    applyMatrixToGrid(matrix, palette);
+});
+
 trimButton.addEventListener('click', () => {
     const { matrix, palette } = buildColorMatrix();
     const trimmed = trimMatrix(matrix);
     matrixOutput.textContent = formatMatrixOutput(trimmed, palette);
     matrixPlaceholder.style.display = 'none';
     matrixOutput.style.display = 'block';
+});
+
+insertColLeftButton.addEventListener('click', () => {
+    insertColumnAtIndex(getInsertIndex(insertColIndexInput, currentGridSize?.width ?? 1), 'left');
+});
+
+insertColRightButton.addEventListener('click', () => {
+    insertColumnAtIndex(getInsertIndex(insertColIndexInput, currentGridSize?.width ?? 1), 'right');
+});
+
+insertRowAboveButton.addEventListener('click', () => {
+    insertRowAtIndex(getInsertIndex(insertRowIndexInput, currentGridSize?.height ?? 1), 'above');
+});
+
+insertRowBelowButton.addEventListener('click', () => {
+    insertRowAtIndex(getInsertIndex(insertRowIndexInput, currentGridSize?.height ?? 1), 'below');
 });
 
 function renderGrid(width, height) {
@@ -198,6 +230,162 @@ function formatMatrixOutput(matrix, palette) {
     });
     lines.push(']');
     return lines.join('\n');
+}
+
+function getInsertIndex(input, maxValue) {
+    const raw = parseInt(input.value, 10);
+    if (!Number.isFinite(raw)) return 0;
+    const zeroBased = raw - 1;
+    if (zeroBased < 0) return 0;
+    if (zeroBased >= maxValue) return Math.max(0, maxValue - 1);
+    return zeroBased;
+}
+
+function insertColumnAtIndex(index, side) {
+    const { matrix, palette } = buildColorMatrix();
+    if (!matrix.length) return;
+    const insertAt = side === 'left' ? index : index + 1;
+    matrix.forEach((row) => {
+        row.splice(insertAt, 0, 0);
+    });
+    applyMatrixToGrid(matrix, palette);
+}
+
+function insertRowAtIndex(index, side) {
+    const { matrix, palette } = buildColorMatrix();
+    if (!matrix.length) return;
+    const width = matrix[0].length || 1;
+    const newRow = new Array(width).fill(0);
+    const insertAt = side === 'above' ? index : index + 1;
+    matrix.splice(insertAt, 0, newRow);
+    applyMatrixToGrid(matrix, palette);
+}
+
+function parseMatrixInput(text) {
+    const palette = parsePaletteBlock(text);
+    const gridBlock = extractNamedBlock(text, 'grid');
+    const matrix = gridBlock ? parseGridBlock(gridBlock) : parseGridBlock(text);
+    return { matrix, palette };
+}
+
+function parsePaletteBlock(text) {
+    const paletteBlock = extractNamedBlock(text, 'palette', '{', '}');
+    if (!paletteBlock) return {};
+    const palette = {};
+    const entryRegex = /([0-9]+)\s*:\s*["']([^"']+)["']/g;
+    let match;
+    while ((match = entryRegex.exec(paletteBlock)) !== null) {
+        palette[parseInt(match[1], 10)] = match[2];
+    }
+    return palette;
+}
+
+function extractNamedBlock(text, name, openChar = '[', closeChar = ']') {
+    const lower = text.toLowerCase();
+    const markerIndex = lower.indexOf(`${name.toLowerCase()}:`);
+    if (markerIndex === -1) return '';
+    const startIndex = text.indexOf(openChar, markerIndex);
+    if (startIndex === -1) return '';
+    return extractBracketBlock(text, startIndex, openChar, closeChar);
+}
+
+function extractBracketBlock(text, startIndex, openChar, closeChar) {
+    let depth = 0;
+    for (let i = startIndex; i < text.length; i += 1) {
+        const char = text[i];
+        if (char === openChar) depth += 1;
+        if (char === closeChar) depth -= 1;
+        if (depth === 0) {
+            return text.slice(startIndex, i + 1);
+        }
+    }
+    return text.slice(startIndex);
+}
+
+function parseGridBlock(block) {
+    const tokens = [];
+    let i = 0;
+    while (i < block.length) {
+        const char = block[i];
+        if (/\s/.test(char)) {
+            i += 1;
+            continue;
+        }
+        if (char === '[' || char === ']' || char === ',') {
+            tokens.push(char);
+            i += 1;
+            continue;
+        }
+        if (char === '-' || /[0-9]/.test(char)) {
+            let j = i + 1;
+            while (j < block.length && /[0-9]/.test(block[j])) j += 1;
+            const numberText = block.slice(i, j);
+            tokens.push(Number.parseInt(numberText, 10));
+            i = j;
+            continue;
+        }
+        i += 1;
+    }
+
+    let index = 0;
+    function parseArray() {
+        if (tokens[index] !== '[') return [];
+        index += 1;
+        const arr = [];
+        while (index < tokens.length && tokens[index] !== ']') {
+            const token = tokens[index];
+            if (token === '[') {
+                arr.push(parseArray());
+                continue;
+            }
+            if (typeof token === 'number') {
+                arr.push(token);
+                index += 1;
+                continue;
+            }
+            if (token === ',') {
+                index += 1;
+                continue;
+            }
+            index += 1;
+        }
+        if (tokens[index] === ']') index += 1;
+        return arr;
+    }
+
+    const parsed = parseArray();
+    return Array.isArray(parsed[0]) ? parsed : [];
+}
+
+function applyMatrixToGrid(matrix, palette) {
+    const height = matrix.length;
+    const width = Math.max(...matrix.map((row) => row.length), 0);
+    if (!width || !height) return;
+
+    const widthInput = form.querySelector('input[name="grid-width"]');
+    const heightInput = form.querySelector('input[name="grid-height"]');
+    widthInput.value = width;
+    heightInput.value = height;
+
+    renderGrid(width, height);
+    currentGridSize = { width, height };
+
+    const defaultColor = '#000000';
+    const cells = Array.from(gridCanvas.children);
+    for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+            const cell = cells[y * width + x];
+            const value = matrix[y]?.[x] ?? 0;
+            if (!value) {
+                cell.style.backgroundColor = '';
+                cell.dataset.color = '';
+                continue;
+            }
+            const color = palette[value] || defaultColor;
+            cell.style.backgroundColor = color;
+            cell.dataset.color = color;
+        }
+    }
 }
 
 function trimMatrix(matrix) {
