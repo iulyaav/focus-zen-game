@@ -3,6 +3,7 @@ export function createFlowerSystem() {
     const flowerTypes = {
         snowdrop: {
             season: 'Spring',
+            lastPossibleDay: 10,
             stages: [
                 { name: 'stage1', duration: 3, asset: 'snowdropStage1' },
                 { name: 'stage2', duration: 5, asset: 'snowdrop' },
@@ -10,18 +11,21 @@ export function createFlowerSystem() {
         },
         redTulip: {
             season: 'Spring',
+            lastPossibleDay: 30,
             stages: [
                 { name: 'stage1', duration: 5, asset: 'tulipStage1' },
             ],
         },
         yellowTulip: {
             season: 'Spring',
+            lastPossibleDay: 30,
             stages: [
                 { name: 'stage1', duration: 10, asset: 'tulipStage1Yellow' },
             ],
         },
         poppy: {
             season: 'Summer',
+            lastPossibleDay: 30,
             stages: [
                 { name: 'stage1', duration: 3, asset: 'poppyStage1' },
             ],
@@ -82,6 +86,10 @@ export function createFlowerSystem() {
         return flowers;
     }
 
+    function getFlowerDefinition(type) {
+        return flowerTypes[type];
+    }
+
     function createGenericFlower(burrowIndex, type) {
         const definition = flowerTypes[type] || {};
         const stageDefinition = definition.stages?.[0] || {};
@@ -132,5 +140,6 @@ export function createFlowerSystem() {
         getFlowers,
         pruneToSeason,
         hasActiveFlowerAtBurrow,
+        getFlowerDefinition,
     };
 }

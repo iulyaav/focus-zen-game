@@ -43,6 +43,9 @@ let groundPlane = null;
 const welcomeScreen = createWelcomeScreen({ durationMs: 1200 });
 const showGridLines = false;
 let grassInstances = [];
+let occupiedBurrows = new Set();
+let pendingReplantBurrows = new Set();
+let seededInitialEmptyBurrows = false;
 const fenceHeight = 7;
 const fenceTopOffset = -2;
 const burrowSystem = createBurrowSystem({
@@ -82,8 +85,13 @@ window.addEventListener('keydown', (e) => {
 
         flowerSystem.updateAll();
         if (days >= 5) {
-            plantForAvailableBurrows();
+            if (!seededInitialEmptyBurrows) {
+                seedInitialEmptyBurrows();
+                seededInitialEmptyBurrows = true;
+            }
+            plantScheduledReplants();
         }
+        updateReplantSchedule();
         updateGarden();
         renderScene();
     }
@@ -116,10 +124,11 @@ function resizeCanvas() {
         flowerSystem.initForBurrows(0);
         const seasonName = seasons[seasonIndex];
         if (seasonName === 'Spring') {
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'redTulip', 0, 1);
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'yellowTulip', 0, 1);
+            plantSeasonSeed('snowdrop', 1, 3);
+            plantSeasonSeed('redTulip', 0, 1);
+            plantSeasonSeed('yellowTulip', 0, 1);
         }
+        occupiedBurrows = getActiveBurrowSet();
     }
     renderScene();
 }
@@ -176,6 +185,7 @@ function advanceSeason() {
         burrowSystem.generateInitial(6);
         flowerSystem.initForBurrows(0);
         generateGrass();
+        seededInitialEmptyBurrows = false;
     } else {
         flowerSystem.pruneToSeason(seasonName);
         generateGrass();
@@ -189,40 +199,89 @@ function advanceSeason() {
     const seasonFlowers = seasonFlowerMap[seasonName] || [];
     if (!isSpringReset) {
         const newIndices = burrowSystem.addSeasonal(1, 2);
-        newIndices.forEach(index => {
-            if (seasonFlowers.length === 0) return;
-            const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
-            flowerSystem.addForBurrow(index, type);
-        });
-    }
-        if (seasonName === 'Spring') {
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'redTulip', 0, 1);
-            flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'yellowTulip', 0, 1);
+        if (seasonName !== 'Summer') {
+            newIndices.forEach(index => {
+                if (seasonFlowers.length === 0) return;
+                const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
+                flowerSystem.addForBurrow(index, type);
+            });
         }
-    if (seasonName === 'Summer') {
-        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'poppy', 1, 2);
     }
+    if (seasonName === 'Spring') {
+        plantSeasonSeed('snowdrop', 1, 3);
+        plantSeasonSeed('redTulip', 0, 1);
+        plantSeasonSeed('yellowTulip', 0, 1);
+    }
+    if (seasonName === 'Summer') {
+        plantSeasonSeed('poppy', 3, 3);
+    }
+    occupiedBurrows = getActiveBurrowSet();
+    pendingReplantBurrows.clear();
     updateHud();
     renderScene();
 }
 
-function plantForAvailableBurrows() {
+function plantScheduledReplants() {
     const seasonFlowerMap = {
-        Spring: ['snowdrop', 'tulip'],
+        Spring: ['snowdrop', 'redTulip', 'yellowTulip'],
         Summer: ['poppy'],
         Autumn: [],
         Winter: [],
     };
     const seasonName = seasons[seasonIndex];
-    const seasonFlowers = seasonFlowerMap[seasonName] || [];
+    const seasonDay = getCurrentSeasonDay();
+    const seasonFlowers = (seasonFlowerMap[seasonName] || []).filter((type) => {
+        const definition = flowerSystem.getFlowerDefinition(type);
+        const lastPossibleDay = definition?.lastPossibleDay ?? 30;
+        return seasonDay <= lastPossibleDay;
+    });
     if (seasonFlowers.length === 0) return;
 
-    const burrows = burrowSystem.getBurrows();
-    burrows.forEach((_, index) => {
+    const toPlant = Array.from(pendingReplantBurrows);
+    pendingReplantBurrows.clear();
+    toPlant.forEach(index => {
         if (flowerSystem.hasActiveFlowerAtBurrow(index)) return;
         const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
         flowerSystem.addForBurrow(index, type);
+    });
+}
+
+function plantSeasonSeed(type, min, max) {
+    const seasonDay = getCurrentSeasonDay();
+    const definition = flowerSystem.getFlowerDefinition(type);
+    const lastPossibleDay = definition?.lastPossibleDay ?? 30;
+    if (seasonDay > lastPossibleDay) return;
+    flowerSystem.plantRandom(burrowSystem.getBurrows().length, type, min, max);
+}
+
+function getCurrentSeasonDay() {
+    return ((days - 1) % 30) + 1;
+}
+
+function updateReplantSchedule() {
+    const activeNow = getActiveBurrowSet();
+    occupiedBurrows.forEach(index => {
+        if (!activeNow.has(index)) {
+            pendingReplantBurrows.add(index);
+        }
+    });
+    occupiedBurrows = activeNow;
+}
+
+function getActiveBurrowSet() {
+    const active = new Set();
+    flowerSystem.getFlowers().forEach(flower => {
+        if (!flower.alive) return;
+        active.add(flower.burrowIndex);
+    });
+    return active;
+}
+
+function seedInitialEmptyBurrows() {
+    const burrows = burrowSystem.getBurrows();
+    burrows.forEach((_, index) => {
+        if (flowerSystem.hasActiveFlowerAtBurrow(index)) return;
+        pendingReplantBurrows.add(index);
     });
 }
 
