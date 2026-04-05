@@ -138,6 +138,31 @@ body {
     width: 140px;
 }
 
+.grid-controls input[type="color"] {
+    width: 44px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid #222;
+    background: #fff;
+}
+
+.color-history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    min-height: 36px;
+}
+
+.color-history button {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #222;
+    padding: 0;
+    background: #fff;
+    cursor: pointer;
+}
+
 .color-popover {
     position: absolute;
     top: 100%;

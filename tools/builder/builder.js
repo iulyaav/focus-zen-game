@@ -3,9 +3,11 @@ const gridCanvas = document.getElementById('grid-canvas');
 const gridPlaceholder = document.querySelector('.grid-placeholder');
 const gridPanel = document.querySelector('.grid-panel');
 const colorInput = form.querySelector('input[name="current-color"]');
+const nativeColorInput = form.querySelector('input[name="native-color"]');
 const eraserButton = form.querySelector('.eraser-button');
 const nightVisionButton = form.querySelector('.night-vision-button');
 const colorPopover = document.getElementById('color-popover');
+const colorHistory = document.querySelector('.color-history');
 const translateButton = document.querySelector('.translate-button');
 const reverseButton = document.querySelector('.reverse-button');
 const trimButton = document.querySelector('.trim-button');
@@ -20,6 +22,7 @@ const insertRowAboveButton = form.querySelector('.insert-row-above-button');
 const insertRowBelowButton = form.querySelector('.insert-row-below-button');
 let currentColor = null;
 let currentGridSize = null;
+const recentColors = [];
 
 form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -35,8 +38,10 @@ form.addEventListener('submit', (event) => {
 colorInput.addEventListener('input', () => {
     const value = colorInput.value.trim();
     if (isValidHexColor(value)) {
-        currentColor = value;
-        colorInput.style.backgroundColor = hexToRgba(value, 0.25);
+        const normalized = normalizeHex(value);
+        currentColor = normalized;
+        colorInput.style.backgroundColor = hexToRgba(normalized, 0.25);
+        nativeColorInput.value = normalized;
     } else {
         currentColor = null;
         colorInput.style.backgroundColor = 'transparent';
@@ -47,6 +52,21 @@ colorInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         event.preventDefault();
     }
+});
+
+colorInput.addEventListener('change', () => {
+    if (currentColor) addToHistory(currentColor);
+});
+
+nativeColorInput.addEventListener('input', () => {
+    const value = nativeColorInput.value;
+    currentColor = value;
+    colorInput.value = value;
+    colorInput.style.backgroundColor = hexToRgba(value, 0.25);
+});
+
+nativeColorInput.addEventListener('change', () => {
+    if (currentColor) addToHistory(currentColor);
 });
 
 colorInput.addEventListener('focus', () => {
@@ -73,6 +93,8 @@ colorPopover.addEventListener('click', (event) => {
     currentColor = value;
     colorInput.value = value;
     colorInput.style.backgroundColor = hexToRgba(value, 0.25);
+    nativeColorInput.value = normalizeHex(value);
+    addToHistory(value);
 });
 
 colorPopover.addEventListener('click', (event) => {
@@ -86,6 +108,7 @@ colorPopover.addEventListener('click', (event) => {
     swatch.dataset.color = currentColor;
     swatch.style.background = currentColor;
     colorPopover.insertBefore(swatch, addButton);
+    addToHistory(currentColor);
 });
 
 eraserButton.addEventListener('click', () => {
@@ -159,6 +182,34 @@ function renderGrid(width, height) {
         });
         gridCanvas.appendChild(cell);
     }
+}
+
+function addToHistory(color) {
+    const normalized = normalizeHex(color);
+    const existingIndex = recentColors.indexOf(normalized);
+    if (existingIndex !== -1) {
+        recentColors.splice(existingIndex, 1);
+    }
+    recentColors.unshift(normalized);
+    if (recentColors.length > 8) recentColors.length = 8;
+    renderColorHistory();
+}
+
+function renderColorHistory() {
+    colorHistory.innerHTML = '';
+    recentColors.forEach((color) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.style.background = color;
+        button.title = color;
+        button.addEventListener('click', () => {
+            currentColor = color;
+            colorInput.value = color;
+            colorInput.style.backgroundColor = hexToRgba(color, 0.25);
+            nativeColorInput.value = color;
+        });
+        colorHistory.appendChild(button);
+    });
 }
 
 function sizeGridCanvas(columns, rows) {
@@ -426,6 +477,14 @@ function trimMatrix(matrix) {
 
 function isValidHexColor(value) {
     return /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(value);
+}
+
+function normalizeHex(value) {
+    if (!value) return value;
+    if (value.length === 4) {
+        return `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`.toLowerCase();
+    }
+    return value.toLowerCase();
 }
 
 function hexToRgba(hex, alpha) {
