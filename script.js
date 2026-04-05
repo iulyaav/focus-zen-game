@@ -237,13 +237,23 @@ function plantScheduledReplants() {
     });
     if (seasonFlowers.length === 0) return;
 
+    const dailyQuota = getDailyReplantCount();
+    if (dailyQuota <= 0) return;
+
     const toPlant = Array.from(pendingReplantBurrows);
-    pendingReplantBurrows.clear();
-    toPlant.forEach(index => {
-        if (flowerSystem.hasActiveFlowerAtBurrow(index)) return;
+    shuffleInPlace(toPlant);
+    let planted = 0;
+    for (const index of toPlant) {
+        if (planted >= dailyQuota) break;
+        if (flowerSystem.hasActiveFlowerAtBurrow(index)) {
+            pendingReplantBurrows.delete(index);
+            continue;
+        }
         const type = seasonFlowers[Math.floor(Math.random() * seasonFlowers.length)];
         flowerSystem.addForBurrow(index, type);
-    });
+        pendingReplantBurrows.delete(index);
+        planted++;
+    }
 }
 
 function plantSeasonSeed(type, min, max) {
@@ -256,6 +266,18 @@ function plantSeasonSeed(type, min, max) {
 
 function getCurrentSeasonDay() {
     return ((days - 1) % 30) + 1;
+}
+
+function getDailyReplantCount() {
+    if (days < 5) return 0;
+    return 1;
+}
+
+function shuffleInPlace(items) {
+    for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+    }
 }
 
 function updateReplantSchedule() {
