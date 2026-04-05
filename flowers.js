@@ -8,6 +8,12 @@ export function createFlowerSystem() {
                 { name: 'stage2', duration: 5, asset: 'snowdrop' },
             ],
         },
+        tulip: {
+            season: 'Spring',
+            stages: [
+                { name: 'stage1', duration: 5, asset: 'tulipStage1' },
+            ],
+        },
     };
 
     function initForBurrows(count, type = 'snowdrop') {

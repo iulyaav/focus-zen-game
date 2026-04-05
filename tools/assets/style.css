@@ -1,0 +1,95 @@
+:root {
+    color-scheme: light;
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    background: #f7f4ef;
+    color: #2b2b2b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 32px;
+}
+
+header {
+    margin-bottom: 24px;
+}
+
+h1 {
+    margin: 0 0 6px 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+p {
+    margin: 0;
+    color: #5a5a5a;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.asset-sheet {
+    border: 1px solid #d7cfc7;
+    background: #fffdf9;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 20px rgba(60, 40, 20, 0.1);
+}
+
+.asset-sheet h2 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7b5f46;
+}
+
+#asset-sheet-canvas {
+    width: 100%;
+    height: auto;
+    background: #f4efe8;
+    border-radius: 8px;
+    border: 1px dashed #d5c6b7;
+    image-rendering: pixelated;
+}
+
+#asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.asset-card {
+    border: 1px solid #d7cfc7;
+    background: #fffdf9;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(60, 40, 20, 0.08);
+}
+
+.asset-card h2 {
+    font-size: 14px;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7b5f46;
+}
+
+.asset-canvas {
+    width: 100%;
+    height: auto;
+    background: #f4efe8;
+    border-radius: 8px;
+    border: 1px dashed #d5c6b7;
+    image-rendering: pixelated;
+}

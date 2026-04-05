@@ -107,6 +107,7 @@ function resizeCanvas() {
         burrowSystem.generateInitial(6);
         flowerSystem.initForBurrows(0);
         flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'snowdrop', 1, 3);
+        flowerSystem.plantRandom(burrowSystem.getBurrows().length, 'tulip', 1, 1);
     }
     renderScene();
 }

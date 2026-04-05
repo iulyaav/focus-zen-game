@@ -7,6 +7,7 @@ const eraserButton = form.querySelector('.eraser-button');
 const nightVisionButton = form.querySelector('.night-vision-button');
 const colorPopover = document.getElementById('color-popover');
 const translateButton = document.querySelector('.translate-button');
+const trimButton = document.querySelector('.trim-button');
 const matrixOutput = document.getElementById('matrix-output');
 const matrixPlaceholder = document.getElementById('matrix-placeholder');
 let currentColor = null;
@@ -92,6 +93,14 @@ nightVisionButton.addEventListener('click', () => {
 translateButton.addEventListener('click', () => {
     const { matrix, palette } = buildColorMatrix();
     matrixOutput.textContent = formatMatrixOutput(matrix, palette);
+    matrixPlaceholder.style.display = 'none';
+    matrixOutput.style.display = 'block';
+});
+
+trimButton.addEventListener('click', () => {
+    const { matrix, palette } = buildColorMatrix();
+    const trimmed = trimMatrix(matrix);
+    matrixOutput.textContent = formatMatrixOutput(trimmed, palette);
     matrixPlaceholder.style.display = 'none';
     matrixOutput.style.display = 'block';
 });
@@ -189,6 +198,42 @@ function formatMatrixOutput(matrix, palette) {
     });
     lines.push(']');
     return lines.join('\n');
+}
+
+function trimMatrix(matrix) {
+    if (!matrix.length) return matrix;
+    const rowCount = matrix.length;
+    const colCount = matrix[0].length || 0;
+
+    let top = 0;
+    while (top < rowCount && matrix[top].every((value) => value === 0)) {
+        top += 1;
+    }
+
+    if (top === rowCount) {
+        return matrix;
+    }
+
+    let bottom = rowCount - 1;
+    while (bottom >= 0 && matrix[bottom].every((value) => value === 0)) {
+        bottom -= 1;
+    }
+
+    let left = 0;
+    while (left < colCount) {
+        const hasValue = matrix.slice(top, bottom + 1).some((row) => row[left] !== 0);
+        if (hasValue) break;
+        left += 1;
+    }
+
+    let right = colCount - 1;
+    while (right >= 0) {
+        const hasValue = matrix.slice(top, bottom + 1).some((row) => row[right] !== 0);
+        if (hasValue) break;
+        right -= 1;
+    }
+
+    return matrix.slice(top, bottom + 1).map((row) => row.slice(left, right + 1));
 }
 
 function isValidHexColor(value) {
