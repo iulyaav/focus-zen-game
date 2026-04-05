@@ -8,15 +8,31 @@ const springSkyState = {
 
 export function drawSpringSky(ctx, plane, cellSize) {
     const palette = ['#9cd9f0', '#8ecae6', '#7bb6d6', '#6aa6c9'];
-    const bandHeight = Math.max(1, Math.floor(plane.height / palette.length));
+    const gridHeight = Math.max(1, Math.floor(plane.height / cellSize));
+    const bandRows = Math.max(1, Math.floor(gridHeight / 4));
 
     for (let i = 0; i < palette.length; i++) {
-        ctx.fillStyle = palette[i];
-        const y = plane.y + i * bandHeight;
-        const height = i === palette.length - 1
-            ? plane.height - i * bandHeight
-            : bandHeight;
-        ctx.fillRect(plane.x, y, plane.width, height);
+        const startRow = i * bandRows;
+        const endRow = i === palette.length - 1
+            ? gridHeight
+            : (i + 1) * bandRows;
+        const rowsInBand = Math.max(0, endRow - startRow);
+        const currentColor = palette[i];
+        const nextColor = palette[i + 1] || currentColor;
+
+        for (let rowOffset = 0; rowOffset < rowsInBand; rowOffset++) {
+            let rowColor = currentColor;
+            if (rowsInBand >= 3) {
+                if (rowOffset === rowsInBand - 2) rowColor = nextColor;
+                if (rowOffset === rowsInBand - 1) rowColor = currentColor;
+            } else if (rowsInBand === 2) {
+                if (rowOffset === 1) rowColor = nextColor;
+            }
+
+            ctx.fillStyle = rowColor;
+            const y = plane.y + (startRow + rowOffset) * cellSize;
+            ctx.fillRect(plane.x, y, plane.width, cellSize);
+        }
     }
 
     initClouds(plane, cellSize);

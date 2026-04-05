@@ -14,6 +14,12 @@ export function createFlowerSystem() {
                 { name: 'stage1', duration: 5, asset: 'tulipStage1' },
             ],
         },
+        poppy: {
+            season: 'Summer',
+            stages: [
+                { name: 'stage1', duration: 5, asset: 'poppyStage1' },
+            ],
+        },
     };
 
     function initForBurrows(count, type = 'snowdrop') {
@@ -26,13 +32,22 @@ export function createFlowerSystem() {
     function plantRandom(burrowCount, type = 'snowdrop', min = 1, max = 3) {
         if (burrowCount <= 0) return;
         const count = min + Math.floor(Math.random() * (max - min + 1));
+        let attempts = 0;
+        const maxAttempts = Math.max(count * 5, 10);
         for (let i = 0; i < count; i++) {
+            if (attempts >= maxAttempts) break;
             const burrowIndex = Math.floor(Math.random() * burrowCount);
+            attempts += 1;
+            if (hasActiveFlowerAtBurrow(burrowIndex)) {
+                i -= 1;
+                continue;
+            }
             flowers.push(createGenericFlower(burrowIndex, type));
         }
     }
 
     function addForBurrow(burrowIndex, type = 'snowdrop') {
+        if (hasActiveFlowerAtBurrow(burrowIndex)) return;
         flowers.push(createGenericFlower(burrowIndex, type));
     }
 
@@ -45,6 +60,15 @@ export function createFlowerSystem() {
             }
             flower.age += 1;
             advanceStageIfNeeded(flower);
+        }
+    }
+
+    function pruneToSeason(seasonName) {
+        for (let i = flowers.length - 1; i >= 0; i--) {
+            const flower = flowers[i];
+            if (flower.season !== seasonName) {
+                flowers.splice(i, 1);
+            }
         }
     }
 
@@ -84,11 +108,16 @@ export function createFlowerSystem() {
         flower.asset = stages[flower.stageIndex].asset || flower.asset;
     }
 
+    function hasActiveFlowerAtBurrow(burrowIndex) {
+        return flowers.some(flower => flower.alive && flower.burrowIndex === burrowIndex);
+    }
+
     return {
         initForBurrows,
         plantRandom,
         addForBurrow,
         updateAll,
         getFlowers,
+        pruneToSeason,
     };
 }
