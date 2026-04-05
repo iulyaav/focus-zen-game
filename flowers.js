@@ -4,6 +4,7 @@ export function createFlowerSystem() {
         snowdrop: {
             season: 'Spring',
             lastPossibleDay: 10,
+            seed: { start: { min: 1, max: 3 } },
             stages: [
                 { name: 'stage1', duration: 3, asset: 'snowdropStage1' },
                 { name: 'stage2', duration: 5, asset: 'snowdrop' },
@@ -12,22 +13,35 @@ export function createFlowerSystem() {
         redTulip: {
             season: 'Spring',
             lastPossibleDay: 30,
+            seed: { start: { min: 0, max: 1 } },
             stages: [
                 { name: 'stage1', duration: 10, asset: 'tulipStage1' },
+                { name: 'stage2', duration: 3, asset: 'tulipStage2' },
             ],
         },
         yellowTulip: {
             season: 'Spring',
             lastPossibleDay: 30,
+            seed: { start: { min: 0, max: 1 } },
             stages: [
                 { name: 'stage1', duration: 10, asset: 'tulipStage1Yellow' },
+                { name: 'stage2', duration: 3, asset: 'tulipStage2Yellow' },
             ],
         },
         poppy: {
             season: 'Summer',
             lastPossibleDay: 30,
+            seed: { start: { min: 3, max: 3 } },
             stages: [
                 { name: 'stage1', duration: 3, asset: 'poppyStage1' },
+            ],
+        },
+        daffodil: {
+            season: 'Spring',
+            lastPossibleDay: 30,
+            seed: { start: { min: 0, max: 1 } },
+            stages: [
+                { name: 'stage1', duration: 6, asset: 'daffodilStage1' },
             ],
         },
     };
@@ -107,6 +121,12 @@ export function createFlowerSystem() {
         return flowerTypes[type];
     }
 
+    function getFlowerTypesBySeason(seasonName) {
+        return Object.entries(flowerTypes)
+            .filter(([, definition]) => definition.season === seasonName)
+            .map(([key]) => key);
+    }
+
     function createGenericFlower(burrowIndex, type) {
         const definition = flowerTypes[type] || {};
         const stageDefinition = definition.stages?.[0] || {};
@@ -159,5 +179,6 @@ export function createFlowerSystem() {
         pruneToSeason,
         hasActiveFlowerAtBurrow,
         getFlowerDefinition,
+        getFlowerTypesBySeason,
     };
 }

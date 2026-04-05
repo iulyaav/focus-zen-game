@@ -1,6 +1,7 @@
 import { FLOWER_ASSETS } from './flowers/snowdrop.js';
 import { TULIP_ASSETS } from './flowers/tulip.js';
 import { POPPY_ASSETS } from './flowers/poppy.js';
+import { DAFFODIL_ASSETS } from './flowers/daffodil.js';
 
 const ASSETS = {
     burrow: {
@@ -111,6 +112,7 @@ const ASSETS = {
 Object.assign(ASSETS, FLOWER_ASSETS || {});
 Object.assign(ASSETS, TULIP_ASSETS || {});
 Object.assign(ASSETS, POPPY_ASSETS || {});
+Object.assign(ASSETS, DAFFODIL_ASSETS || {});
 
 function drawAsset(ctx, asset, worldX, worldY, cellSize) {
     for (let y = 0; y < asset.grid.length; y++) {
